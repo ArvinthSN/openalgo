@@ -124,3 +124,115 @@
 @media (max-width: 760px) {
   .heatmap-page { padding: 0; }
 }
+
+
+/* Clean proportional treemap layout */
+.heatmap-page .heat-main-grid {
+  grid-template-columns: minmax(0, 2.1fr) minmax(310px, .95fr);
+  gap: 12px;
+  align-items: stretch;
+}
+.heatmap-page .heat-sector-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 230px;
+  gap: 9px;
+  align-content: start;
+}
+.heatmap-page .heat-sector-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.heatmap-page .heat-sector-card header {
+  flex: 0 0 34px;
+  height: 34px;
+  padding: 0 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  font-size: 12px;
+}
+.heatmap-page .heat-sector-card header b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.heatmap-page .heat-sector-tiles.heat-treemap {
+  position: relative;
+  display: block;
+  flex: 1;
+  min-height: 0;
+  padding: 4px;
+  overflow: hidden;
+}
+.heatmap-page .heat-treemap .heat-tile {
+  position: absolute;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  padding: clamp(3px, .65vw, 9px);
+  border-radius: 5px;
+  border: 1px solid color-mix(in srgb, white 14%, transparent);
+  text-align: center;
+  overflow: hidden;
+}
+.heatmap-page .heat-treemap .heat-tile-symbol {
+  display: block;
+  width: 100%;
+  font-size: clamp(9px, .82vw, 13px);
+  font-weight: 850;
+  letter-spacing: .01em;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.heatmap-page .heat-treemap .heat-tile-name {
+  display: block;
+  width: 100%;
+  font-size: clamp(8px, .68vw, 11px);
+  font-weight: 550;
+  line-height: 1.15;
+  opacity: .86;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.heatmap-page .heat-treemap .heat-tile-change {
+  font-size: clamp(9px, .8vw, 13px);
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.heatmap-page .heat-treemap .heat-tile-price {
+  font-size: clamp(8px, .62vw, 10px);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.heatmap-page .heat-treemap .heat-tile-small .heat-tile-name,
+.heatmap-page .heat-treemap .heat-tile-small .heat-tile-price,
+.heatmap-page .heat-treemap .heat-tile-medium .heat-tile-price { display: none; }
+.heatmap-page .heat-treemap .heat-tile-small .heat-tile-symbol { font-size: clamp(8px, .7vw, 11px); }
+.heatmap-page .heat-treemap .heat-tile-small .heat-tile-change { font-size: clamp(8px, .65vw, 10px); }
+.heatmap-page .heat-treemap .heat-tile-medium .heat-tile-name { font-size: 9px; }
+.heatmap-page .heat-index-card { min-height: 62px; }
+.heatmap-page .heat-index-card em { white-space: nowrap; }
+.heatmap-page .heat-toolbar { gap: 8px; }
+.heatmap-page .heat-view-switch { margin-right: 8px; }
+.heatmap-page .heat-side-panel { min-height: 100%; }
+.heatmap-page .heat-commodity-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.heatmap-page .heat-commodity-tiles .heat-tile { min-height: 90px; }
+@media (max-width: 1250px) {
+  .heatmap-page .heat-sector-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 220px; }
+  .heatmap-page .heat-main-grid { grid-template-columns: minmax(0, 1fr) 300px; }
+}
+@media (max-width: 900px) {
+  .heatmap-page .heat-main-grid { grid-template-columns: 1fr; }
+  .heatmap-page .heat-sector-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .heatmap-page .heat-sector-grid { grid-template-columns: 1fr; grid-auto-rows: 230px; }
+  .heatmap-page .heat-index-card { min-height: 56px; }
+}
