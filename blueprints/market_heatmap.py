@@ -1,0 +1,68 @@
+"""Session-authenticated Market Heatmap read API."""
+from flask import Blueprint, jsonify, request
+
+from services.market_heatmap_service import (
+    instrument_detail,
+    instrument_history,
+    market_movers,
+    market_snapshot,
+)
+from utils.session import check_session_validity
+
+market_heatmap_bp = Blueprint("market_heatmap_bp", __name__)
+
+
+@market_heatmap_bp.get("/market-heatmap/api/snapshot")
+@check_session_validity
+def snapshot():
+    market = (request.args.get("market") or "ALL").upper()
+    asset_type = (request.args.get("asset_type") or "ALL").lower()
+    period = (request.args.get("period") or "1D").upper()
+    if market not in {"ALL", "INDIA", "GLOBAL", "COMMODITY"}:
+        return jsonify({"status": "error", "message": "Unsupported market filter"}), 400
+    if asset_type not in {"ALL", "COMPANY", "COMMODITY", "INDEX"}:
+        return jsonify({"status": "error", "message": "Unsupported asset type"}), 400
+    if period not in {"1D", "1W", "1M", "3M", "1Y"}:
+        return jsonify({"status": "error", "message": "Unsupported period"}), 400
+    return jsonify(market_snapshot(market, asset_type, period))
+
+
+@market_heatmap_bp.get("/market-heatmap/api/movers")
+@check_session_validity
+def movers():
+    market = (request.args.get("market") or "GLOBAL").upper()
+    direction = (request.args.get("direction") or "gainers").lower()
+    try:
+        limit = int(request.args.get("limit", 10))
+    except ValueError:
+        return jsonify({"status": "error", "message": "limit must be an integer"}), 400
+    if market not in {"INDIA", "GLOBAL"} or direction not in {"gainers", "losers"}:
+        return jsonify({"status": "error", "message": "Unsupported movers filter"}), 400
+    return jsonify(market_movers(market, direction, limit))
+
+
+@market_heatmap_bp.get("/market-heatmap/api/instruments/<string:symbol>")
+@check_session_validity
+def instrument(symbol):
+    exchange = request.args.get("exchange", "")
+    data = instrument_detail(symbol, exchange)
+    if data is None:
+        return jsonify({"status": "error", "message": "Instrument not found"}), 404
+    return jsonify({"status": "success", "data": data})
+
+
+@market_heatmap_bp.get("/market-heatmap/api/instruments/<string:symbol>/history")
+@check_session_validity
+def instrument_history_route(symbol):
+    exchange = request.args.get("exchange", "")
+    timeframe = (request.args.get("timeframe") or "1D").upper()
+    if timeframe not in {"1M", "5M", "15M", "30M", "1H", "1D", "1W"}:
+        return jsonify({"status": "error", "message": "Unsupported timeframe"}), 400
+    try:
+        limit = int(request.args.get("limit", 250))
+    except ValueError:
+        return jsonify({"status": "error", "message": "limit must be an integer"}), 400
+    return jsonify({
+        "status": "success",
+        "data": instrument_history(symbol, exchange, timeframe, limit),
+    })
