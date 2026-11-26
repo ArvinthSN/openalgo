@@ -70,6 +70,7 @@ jobs:
             test/test_fyers_hsm_price_precision.py \
             test/test_graceful_shutdown.py \
             test/test_flattrade_data_silence_watchdog.py \
+            test/test_market_heatmap_db.py test/test_market_heatmap_providers.py \
             test/test_requirements_parity.py \
             test/test_fyers_index_hsm_mapping.py \
             test/test_qty_freeze_unknown_default.py \
