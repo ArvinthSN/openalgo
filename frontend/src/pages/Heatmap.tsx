@@ -116,6 +116,7 @@ export default function Heatmap() {
   const [expanded, setExpanded] = useState(false)
   const [detailTab, setDetailTab] = useState('Overview')
   const [watchlisted, setWatchlisted] = useState(false)
+  const [watchlistBusy, setWatchlistBusy] = useState(false)
 
   const loadSnapshot = async (quiet = false) => {
     if (quiet) setRefreshing(true); else setLoading(true)
@@ -167,6 +168,53 @@ export default function Heatmap() {
       setCandles(payload.data ?? [])
     } catch { setCandles([]) }
   }
+
+  const addSelectedToWatchlist = async () => {
+    if (!selected || !selected.exchange || watchlistBusy) return
+    setWatchlistBusy(true)
+    setError('')
+    try {
+      const requestOptions = { credentials: 'same-origin' as RequestCredentials }
+      const listsResponse = await fetch('/watchlist/api/lists', requestOptions)
+      if (!listsResponse.ok) throw new Error('Could not load your watchlists')
+      let listsPayload = await listsResponse.json()
+      let target = (listsPayload.data ?? [])[0]
+      if (!target) {
+        const createResponse = await fetch('/watchlist/api/lists', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'Heatmap' }),
+        })
+        if (createResponse.ok) {
+          const created = await createResponse.json()
+          target = created.data
+        } else {
+          const retry = await fetch('/watchlist/api/lists', requestOptions)
+          listsPayload = await retry.json()
+          target = (listsPayload.data ?? []).find((list: { name: string }) => list.name === 'Heatmap') ?? (listsPayload.data ?? [])[0]
+        }
+      }
+      if (!target) throw new Error('Create a watchlist before adding instruments')
+      const exists = (target.items ?? []).some((item: { symbol: string; exchange: string }) =>
+        item.symbol === selected.symbol && item.exchange === selected.exchange
+      )
+      if (!exists) {
+        const addResponse = await fetch(`/watchlist/api/lists/${target.id}/items`, {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ symbol: selected.symbol, exchange: selected.exchange }),
+        })
+        if (!addResponse.ok) throw new Error('Could not add this instrument to the watchlist')
+      }
+      setWatchlisted(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Watchlist update failed')
+    } finally {
+      setWatchlistBusy(false)
+    }
+  }
+
+  useEffect(() => { setWatchlisted(false) }, [selected?.symbol, selected?.exchange])
 
   useEffect(() => { void loadSnapshot() }, [market, view, period])
   useEffect(() => { void loadMovers() }, [moverMarket, moverDirection])
@@ -259,7 +307,7 @@ export default function Heatmap() {
         <div className="heat-chart-panel"><div className="heat-chart-periods">{PERIODS.map(p => <button key={p} className={period === p ? 'active' : ''} onClick={() => setPeriod(p)}>{p}</button>)}</div><MiniChart candles={candles} /><div className="heat-chart-axis"><span>Historical OHLCV</span><span>{candles.length} candles stored</span></div></div>
         <div className="heat-company-panel">
           <div className="heat-detail-tabs">{['Overview', 'News', 'Financials', 'Technicals'].map(tab => <button key={tab} className={detailTab === tab ? 'active' : ''} onClick={() => setDetailTab(tab)}>{tab}</button>)}</div>
-          {selected ? <><p>{detailTab === 'Overview' ? `${selected.name} market overview. Company description and fundamentals will be supplied by the reference-data provider.` : `${detailTab} data is not available until its provider integration is configured.`}</p><div className="heat-tags"><span>{selected.sector || selected.asset_type}</span><span>{selected.country || selected.market}</span></div><div className="heat-detail-actions"><button onClick={() => setWatchlisted(v => !v)}><Star size={14} fill={watchlisted ? 'currentColor' : 'none'} /> {watchlisted ? 'In Watchlist' : 'Add to Watchlist'}</button><button onClick={() => window.location.assign(`/chart?symbol=${encodeURIComponent(selected.symbol)}&exchange=${encodeURIComponent(selected.exchange)}`)}>Open in Chart →</button></div></> : <p>Instrument fundamentals and company information will appear here.</p>}
+          {selected ? <><p>{detailTab === 'Overview' ? `${selected.name} market overview. Company description and fundamentals will be supplied by the reference-data provider.` : `${detailTab} data is not available until its provider integration is configured.`}</p><div className="heat-tags"><span>{selected.sector || selected.asset_type}</span><span>{selected.country || selected.market}</span></div><div className="heat-detail-actions"><button onClick={() => void addSelectedToWatchlist()} disabled={watchlistBusy}><Star size={14} fill={watchlisted ? 'currentColor' : 'none'} /> {watchlistBusy ? 'Adding…' : watchlisted ? 'Added to Watchlist' : 'Add to Watchlist'}</button><button onClick={() => window.location.assign(`/tradingview?symbol=${encodeURIComponent(selected.symbol)}&exchange=${encodeURIComponent(selected.exchange)}`)}>Open in Chart →</button></div></> : <p>Instrument fundamentals and company information will appear here.</p>}
         </div>
       </section>
       <footer className="heatmap-footnote"><span><Activity size={13} /> {marketStatus}</span><span>Source timestamp: {assets.find(a => a.as_of)?.as_of ?? 'No provider snapshot stored yet'}</span><span>SQLite market store</span></footer>
