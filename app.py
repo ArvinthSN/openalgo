@@ -284,6 +284,8 @@ def create_app():
         logger.warning("React frontend not available - run 'npm run build' in frontend/")
 
     app.register_blueprint(api_v1_bp)
+    # Register Market Heatmap APIs alongside the other API routes.
+    app.register_blueprint(market_heatmap_bp)
 
     # Pull openstatz in on a background thread. It costs about 1.4s, almost all
     # of it matplotlib and seaborn behind its plotting module, which the
@@ -341,7 +343,6 @@ def create_app():
     app.register_blueprint(ivchart_bp)  # Register IV chart blueprint
     app.register_blueprint(scalping_bp)  # Register Scalping terminal blueprint
     app.register_blueprint(watchlist_bp)  # Register charting watchlist blueprint
-    app.register_blueprint(market_heatmap_bp)  # Register Market Heatmap APIs
     app.register_blueprint(alerts_bp)  # Register chart alert log blueprint
     app.register_blueprint(alert_channels_bp)  # Register alert channels (/alerts page)
     app.register_blueprint(oitracker_bp)  # Register OI tracker blueprint
