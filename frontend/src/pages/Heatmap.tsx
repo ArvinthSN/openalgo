@@ -90,18 +90,68 @@ async function readApiJson(response: Response, context: string): Promise<any> {
   }
 }
 
-function HeatTile({ asset, selected, onSelect, compact = false, sizeBy = 'market_cap' }: {
-  asset: Asset; selected: boolean; onSelect: () => void; compact?: boolean; sizeBy?: string
+
+type TreemapRect = { x: number; y: number; w: number; h: number }
+
+/** Squarified treemap: tile area follows market cap while keeping rectangles readable. */
+function squarifyAssets(items: Asset[], sizeBy: string): Map<string, TreemapRect> {
+  const result = new Map<string, TreemapRect>()
+  if (!items.length) return result
+  const weights = items.map(asset => sizeBy === 'equal' ? 1 : Math.max(0, asset.market_cap ?? asset.reference_market_cap ?? 0))
+  const usable = weights.some(weight => weight > 0) ? weights.map(weight => weight || 1) : items.map(() => 1)
+  const total = usable.reduce((sum, value) => sum + value, 0)
+  const nodes = items.map((asset, index) => ({ key: `${asset.exchange}:${asset.symbol}`, area: usable[index] / total * 10000 }))
+    .sort((a, b) => b.area - a.area)
+  let remaining: TreemapRect = { x: 0, y: 0, w: 100, h: 100 }
+  const worst = (row: typeof nodes, side: number) => {
+    if (!row.length) return Infinity
+    const sum = row.reduce((v, item) => v + item.area, 0)
+    const largest = Math.max(...row.map(item => item.area))
+    const smallest = Math.min(...row.map(item => item.area))
+    return Math.max((side * side * largest) / (sum * sum), (sum * sum) / (side * side * smallest))
+  }
+  const placeRow = (row: typeof nodes) => {
+    const area = row.reduce((v, item) => v + item.area, 0)
+    const horizontal = remaining.w >= remaining.h
+    const side = horizontal ? remaining.h : remaining.w
+    const thickness = side ? area / side : 0
+    let offset = 0
+    row.forEach(item => {
+      const length = thickness ? item.area / thickness : 0
+      const rect = horizontal
+        ? { x: remaining.x, y: remaining.y + offset, w: thickness, h: length }
+        : { x: remaining.x + offset, y: remaining.y, w: length, h: thickness }
+      result.set(item.key, rect)
+      offset += length
+    })
+    if (horizontal) { remaining = { ...remaining, x: remaining.x + thickness, w: Math.max(0, remaining.w - thickness) } }
+    else { remaining = { ...remaining, y: remaining.y + thickness, h: Math.max(0, remaining.h - thickness) } }
+  }
+  let row: typeof nodes = []
+  while (nodes.length) {
+    const next = nodes[0]
+    const side = Math.min(remaining.w, remaining.h)
+    if (!row.length || worst([...row, next], side) <= worst(row, side)) {
+      row.push(nodes.shift()!)
+    } else {
+      placeRow(row)
+      row = []
+    }
+  }
+  if (row.length) placeRow(row)
+  return result
+}
+
+function HeatTile({ asset, selected, onSelect, compact = false, sizeBy = 'market_cap', tileStyle, density = 'large' }: {
+  asset: Asset; selected: boolean; onSelect: () => void; compact?: boolean; sizeBy?: string; tileStyle?: React.CSSProperties; density?: 'small' | 'medium' | 'large'
 }) {
-  const weight = asset.market_cap ?? asset.reference_market_cap ?? 0
-  const span = !compact && sizeBy === 'market_cap' && weight > 1_000_000_000_000 ? 2 : 1
   return (
     <button
       type="button"
       onClick={onSelect}
       title={`${asset.name} · ${fmtPrice(asset.last_price, asset.currency)} · ${fmtPct(asset.change_percent)}`}
-      className={cn('heat-tile', tileTone(asset.change_percent), selected && 'heat-tile-selected', compact && 'heat-tile-compact')}
-      style={{ gridColumn: `span ${span}` }}
+      className={cn('heat-tile', tileTone(asset.change_percent), selected && 'heat-tile-selected', compact && 'heat-tile-compact', `heat-tile-${density}`)}
+      style={tileStyle}
     >
       <span className="heat-tile-symbol">{asset.symbol}</span>
       <span className="heat-tile-name">{asset.name}</span>
@@ -366,8 +416,16 @@ export default function Heatmap() {
               const average = validChanges.length ? validChanges.reduce((sum, v) => sum + v, 0) / validChanges.length : null
               return <section className="heat-sector-card" key={group}>
                 <header><b>{group}</b><strong className={average != null && average < 0 ? 'negative' : 'positive'}>{fmtPct(average)}</strong></header>
-                <div className="heat-sector-tiles">
-                  {items.map(asset => <HeatTile key={`${asset.exchange}:${asset.symbol}`} asset={asset} selected={selected?.symbol === asset.symbol && selected.exchange === asset.exchange} onSelect={() => setSelected(asset)} sizeBy={sizeBy} />)}
+                <div className="heat-sector-tiles heat-treemap">
+                  {(() => {
+                    const rectangles = squarifyAssets(items, sizeBy)
+                    return items.map(asset => {
+                      const rect = rectangles.get(`${asset.exchange}:${asset.symbol}`) ?? { x: 0, y: 0, w: 100, h: 100 }
+                      const area = rect.w * rect.h
+                      const density = area < 420 ? 'small' : area < 1050 ? 'medium' : 'large'
+                      return <HeatTile key={`${asset.exchange}:${asset.symbol}`} asset={asset} selected={selected?.symbol === asset.symbol && selected.exchange === asset.exchange} onSelect={() => setSelected(asset)} sizeBy={sizeBy} density={density} tileStyle={{ left: `${rect.x}%`, top: `${rect.y}%`, width: `${rect.w}%`, height: `${rect.h}%` }} />
+                    })
+                  })()}
                 </div>
               </section>
             }) : <div className="heat-empty-state"><Layers3 size={24} /><b>No market instruments yet</b><span>Once a market-data provider is connected and its instruments are ingested, they will appear here. No sample prices are shown.</span></div>
