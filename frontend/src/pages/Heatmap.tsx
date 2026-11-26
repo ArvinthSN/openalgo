@@ -234,7 +234,7 @@ export default function Heatmap() {
   useEffect(() => { setWatchlisted(false) }, [selected?.symbol, selected?.exchange])
 
   useEffect(() => { void loadSnapshot() }, [market, view, period])
-  useEffect(() => { void refreshMarketData(); const timer = window.setInterval(() => void refreshMarketData(), 300000); return () => window.clearInterval(timer) }, [])
+  useEffect(() => { void refreshMarketData(); const timer = window.setInterval(() => void refreshMarketData(), 600000); return () => window.clearInterval(timer) }, [])
   useEffect(() => { void loadMovers() }, [moverMarket, moverDirection])
   useEffect(() => { void loadHistory(selected) }, [selected?.symbol, selected?.exchange, period])
 
