@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   Activity, ArrowDownRight, ArrowUpRight, BarChart3, ChevronDown, Expand,
-  Gem, Globe2, Layers3, RefreshCw, Search, Star, X,
+  Gem, Layers3, RefreshCw, Search, Star, X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useMarketData } from '@/hooks/useMarketData'
