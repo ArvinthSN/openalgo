@@ -399,7 +399,7 @@ def refresh_for_user(username: str, *, force: bool = False) -> dict[str, Any]:
     now = time.monotonic()
     with _refresh_lock:
         last = _last_refresh.get(username, 0)
-        if not force and now - last < 600:
+        if not force and now - last < 7200:
             return {"status": "success", "skipped": True,
                     "message": "Market data was refreshed recently.",
                     "providers": _refresh_results.get(username, {})}
