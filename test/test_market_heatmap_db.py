@@ -35,6 +35,7 @@ def test_snapshot_and_movers_use_latest_quote(heatmap_store):
     snapshot = db.get_snapshot("GLOBAL", "company")
     assert len(snapshot) == 2
     assert {row["symbol"] for row in snapshot} == {"AAA", "BBB"}
+    assert len(db.get_snapshot()) == 2
     assert db.get_movers("GLOBAL", "gainers", 1)[0]["symbol"] == "AAA"
     assert db.get_movers("GLOBAL", "losers", 1)[0]["symbol"] == "BBB"
 
