@@ -4,7 +4,6 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   BarChart3,
-  ChevronDown,
   CircleDollarSign,
   Factory,
   Fuel,
