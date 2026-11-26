@@ -70,7 +70,7 @@ def instrument_history_route(symbol):
 
 
 
-@market_heatmap_bp.post("/market-heatmap/api/refresh")
+@market_heatmap_bp.get("/market-heatmap/api/refresh")
 @check_session_validity
 def refresh():
     """Fetch fresh quotes using the configured Twelve Data and logged-in broker feeds."""
