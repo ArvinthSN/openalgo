@@ -282,6 +282,12 @@ def react_sip_backtester():
 def react_sector_rotation():
     return serve_react_app()
 
+ 
+# Market Heatmap
+@react_bp.route("/heatmap", strict_slashes=False)
+def react_heatmap():
+    return serve_react_app()
+
 
 # The former path. Kept so an existing bookmark reaches the SPA, which
 # redirects it to the new one rather than showing a not-found.
