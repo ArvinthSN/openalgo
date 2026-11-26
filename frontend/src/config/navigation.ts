@@ -14,6 +14,7 @@ import {
   FileText,
   FlaskConical,
   Gauge,
+  Grid3X3,
   Key,
   Layers,
   LayoutDashboard,
@@ -75,6 +76,7 @@ export const profileMenuItems: NavItem[] = [
   // main navbar on that understanding and a test pins the adjacency, so a new
   // entry goes after it rather than between the two.
   { href: '/action-center', label: 'Action Center', icon: Bell },
+  { href: '/heatmap', label: 'Market Heatmap', icon: Grid3X3 },
   // Agent Config is NOT here. It lives under /admin with the other
   // configuration surfaces. The chat header carries its own settings control,
   // so a configured /agent still has a route back to its settings without this
