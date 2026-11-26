@@ -14,6 +14,7 @@ import {
   FileText,
   FlaskConical,
   Gauge,
+  Grid3X3,
   Key,
   Layers,
   LayoutDashboard,
@@ -51,6 +52,7 @@ export const navItems: NavItem[] = [
   { href: '/strategy', label: 'Strategies', icon: Boxes, collapseBelow: 'xl' },
   { href: '/logs', label: 'Logs', icon: FileBarChart, collapseBelow: 'xl' },
   { href: '/tools', label: 'Tools', icon: Wrench, collapseBelow: 'xl' },
+  { href: '/heatmap', label: 'Market Heatmap', icon: Grid3X3, collapseBelow: 'xl' },
 ]
 
 // Items shown in mobile bottom navigation

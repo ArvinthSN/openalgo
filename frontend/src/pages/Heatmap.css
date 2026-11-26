@@ -1,0 +1,126 @@
+.heatmap-page{--hm-bg:#070d19;--hm-panel:#0b1423;--hm-border:#203149;--hm-muted:#8ea0b9;--hm-text:#edf3ff;color:var(--hm-text);margin:-1.25rem -1rem 0;padding:14px;background:radial-gradient(ellipse at 45% -30%,#172849 0,transparent 55%),#070d19;min-height:calc(100vh - 90px);font-size:13px}
+.heatmap-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:0 0 12px}.heatmap-title{display:flex;align-items:center;gap:12px}.heatmap-globe{font-size:25px}.heatmap-title h1{font-size:20px;font-weight:800;letter-spacing:-.02em}.heatmap-title p{font-size:11px;color:var(--hm-muted);margin-top:2px}.heat-live-pill{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:5px 10px;font-size:10px;font-weight:800;white-space:nowrap}.heat-live-pill i{width:7px;height:7px;border-radius:50%;background:currentColor}.heat-live-pill.is-live{color:#39e68c;background:#0c3929}.heat-live-pill.is-waiting{color:#f4bf58;background:#3b2b12}.heatmap-heading-actions{display:flex;align-items:center;gap:8px}.heat-clock{border:1px solid var(--hm-border);border-radius:10px;padding:8px 12px;color:#c7d3e6;font-size:11px}
+.heat-icon-button{height:35px;width:36px;display:grid;place-items:center;border:1px solid #2a3d58;border-radius:9px;background:#101c2e;color:#dce8fa}.heat-index-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:10px}.heat-index-card{min-width:0;display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--hm-border);border-radius:11px;background:linear-gradient(135deg,#101c2e,#0a1422);box-shadow:0 5px 18px #0003}.heat-index-flag{font-size:20px}.heat-index-card div{min-width:0;display:flex;flex-direction:column;gap:3px;flex:1}.heat-index-card b{font-size:11px;white-space:nowrap}.heat-index-card strong{font-size:12px;font-variant-numeric:tabular-nums}.heat-index-card em{font-style:normal;font-weight:800;font-size:11px}.positive{color:#27e887!important}.negative{color:#ff6976!important}.heat-index-empty{opacity:.75}
+.heat-toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:9px 10px;margin-bottom:10px;border:1px solid var(--hm-border);border-radius:12px;background:linear-gradient(110deg,#0e1929,#0a1321);box-shadow:0 6px 20px #0004}.heat-view-switch{display:flex;gap:6px;margin-right:auto}.heat-view-switch button,.heat-select-label,.heat-toolbar-search{height:36px;border:1px solid #2b3e5a;border-radius:9px;background:#101c2d;color:#dce7f8}.heat-view-switch button{padding:0 17px;font-weight:750}.heat-view-switch button.active{background:linear-gradient(120deg,#7026ee,#4c1ac0);border-color:#9d6aff;color:white;box-shadow:0 0 15px #772bff55}.heat-select-label{display:flex;align-items:center;gap:5px;padding:0 9px;font-size:11px;color:#aebdd1;white-space:nowrap}.heat-select-label select{appearance:none;background:transparent;color:#f2f6ff;font-weight:700;outline:0;min-width:66px}.heat-select-label option,.heat-mover-controls select{background:#101c2d;color:#fff}.heat-toolbar-search{display:flex;align-items:center;gap:7px;padding:0 9px;min-width:145px}.heat-toolbar-search input{width:110px;background:transparent;outline:0;color:white;font-size:11px}.heat-toolbar-search input::placeholder{color:#8192aa}
+.heat-main-grid{display:grid;grid-template-columns:minmax(0,2.05fr) minmax(330px,1.05fr);gap:10px;align-items:stretch}.heat-sector-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(190px,auto);gap:7px;min-width:0}.heat-sector-card{min-width:0;overflow:hidden;border:1px solid #17623e;border-radius:12px;background:linear-gradient(145deg,#071f18,#081b18 58%,#091421);box-shadow:inset 0 0 24px #00a85c0a}.heat-sector-card header{height:35px;padding:8px 11px;display:flex;justify-content:space-between;align-items:center;font-size:12px}.heat-sector-card header strong{font-size:12px}.heat-sector-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(68px,auto);gap:4px;padding:0 6px 6px}.heat-tile{min-width:0;min-height:84px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;padding:7px 5px;border:1px solid #ffffff17;border-radius:9px;color:white;overflow:hidden;text-align:center;transition:transform .14s,filter .14s,box-shadow .14s}.heat-tile:hover{transform:translateY(-2px);filter:brightness(1.13);z-index:2}.heat-tile-selected{outline:2px solid #b9fff0;outline-offset:-2px;box-shadow:0 0 15px #20ffd966}.heat-tile-strong-up{background:linear-gradient(145deg,#08a94d,#075d34)}.heat-tile-up{background:linear-gradient(145deg,#087d43,#064c31)}.heat-tile-strong-down{background:linear-gradient(145deg,#c93448,#762338)}.heat-tile-down{background:linear-gradient(145deg,#812b40,#4e2032)}.heat-tile-neutral{background:linear-gradient(145deg,#26364c,#17263a)}.heat-tile-symbol{font-size:10px;font-weight:800;opacity:.9}.heat-tile-name{font-size:12px;font-weight:800;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.heat-tile-change{font-size:13px;font-variant-numeric:tabular-nums}.heat-tile-price{font-size:10px;opacity:.82}.heat-tile-compact{min-height:94px}
+.heat-side-panel{min-width:0;border:1px solid #253c59;border-radius:12px;background:linear-gradient(150deg,#0c1727,#08111f);padding:10px;display:flex;flex-direction:column;gap:9px}.heat-side-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.heat-side-heading h2{font-size:16px;font-weight:800}.heat-side-heading h2 span{color:#48df8b}.heat-side-tabs{display:flex;gap:3px;padding:3px;background:#101d2f;border-radius:8px}.heat-side-tabs button{font-size:10px;padding:5px 7px;border-radius:6px;color:#aebbd0}.heat-side-tabs button.active{background:#263b5a;color:white}.heat-commodity-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.heat-commodity-table{border:1px solid #25364e;border-radius:8px;overflow:hidden}.heat-table-head,.heat-commodity-table button{display:grid;grid-template-columns:1.3fr 1fr .65fr;gap:5px;align-items:center;padding:7px 8px;font-size:10px}.heat-table-head{background:#132239;color:#b7c5d8}.heat-commodity-table button{width:100%;text-align:left;border-top:1px solid #1b2a40;color:#e8eef8}.heat-commodity-table button b,.heat-commodity-table button strong{text-align:right;font-size:10px;font-variant-numeric:tabular-nums}.heat-side-empty{grid-column:1/-1;min-height:110px;display:flex;align-items:center;justify-content:center;gap:9px;text-align:center;padding:15px;color:var(--hm-muted);font-size:11px;border:1px dashed #31425a;border-radius:8px}.heat-mover-controls{display:flex;gap:5px;flex-wrap:wrap}.heat-mover-controls select,.heat-mover-controls button{border:1px solid #2b3e58;border-radius:7px;padding:6px 8px;font-size:10px;background:#111e30;color:#dce7f6}.heat-mover-controls button{display:flex;align-items:center;gap:3px}.heat-mover-controls button.active{background:#43218e;border-color:#8250e7}.heat-mover-list{display:flex;flex-direction:column}.heat-mover-list button{display:flex;align-items:center;gap:9px;padding:9px 5px;text-align:left;border-bottom:1px solid #1e2c40}.heat-mover-rank{color:#8091a9;font-size:11px}.heat-mover-list button span:nth-child(2){display:flex;flex-direction:column;flex:1}.heat-mover-list b{font-size:11px}.heat-mover-list small{font-size:10px;color:#8fa0b8}.heat-mover-list strong{font-size:11px}
+.heat-detail-panel{display:grid;grid-template-columns:minmax(230px,.95fr) minmax(300px,1.55fr) minmax(260px,1.05fr);gap:0;margin-top:10px;border:1px solid #263a55;border-radius:13px;background:linear-gradient(145deg,#0c1727,#08111e);overflow:hidden;box-shadow:0 8px 24px #0004}.heat-instrument-summary,.heat-chart-panel,.heat-company-panel{min-width:0;padding:14px;border-right:1px solid #1c2b40}.heat-instrument-market{font-size:10px;color:#8ea1ba}.heat-instrument-name{display:flex;align-items:center;gap:9px;margin:8px 0}.heat-instrument-name b{font-size:17px;background:#1a2940;border-radius:7px;padding:4px 7px}.heat-instrument-name span{font-size:13px;font-weight:700}.heat-instrument-price{font-size:27px;font-weight:850;letter-spacing:-.03em}.heat-instrument-change{font-size:12px;font-weight:800;margin-top:2px}.heat-instrument-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;border-top:1px solid #24354c;margin-top:12px;padding-top:10px}.heat-instrument-stats span{display:flex;flex-direction:column;gap:5px;min-width:0}.heat-instrument-stats small{font-size:10px;color:#8799b1}.heat-instrument-stats b{font-size:11px;overflow:hidden;text-overflow:ellipsis}.heat-detail-no-selection{font-size:12px;color:#92a3ba;padding:20px 0}.heat-chart-panel{display:flex;flex-direction:column}.heat-chart-periods{display:flex;gap:4px}.heat-chart-periods button{padding:5px 9px;border-radius:7px;font-size:10px;color:#b6c4d8}.heat-chart-periods button.active{background:#6324d5;color:white}.heat-chart-svg{width:100%;height:115px;margin-top:9px;overflow:visible}.heat-chart-grid{stroke:#26374e;stroke-width:.45;stroke-dasharray:1 1}.heat-chart-line{fill:none;stroke:#23df83;stroke-width:1.5;vector-effect:non-scaling-stroke}.heat-chart-empty{height:115px;display:flex;align-items:center;justify-content:center;gap:8px;color:#8294ad;font-size:11px}.heat-chart-axis{display:flex;justify-content:space-between;font-size:9px;color:#7f91a9}.heat-company-panel{border-right:0}.heat-detail-tabs{display:flex;justify-content:space-between;gap:4px;border-radius:8px;background:#132137;padding:3px}.heat-detail-tabs button{font-size:10px;padding:6px 7px;border-radius:6px;color:#aebbd0}.heat-detail-tabs button.active{background:#6124d1;color:#fff}.heat-company-panel p{font-size:11px;line-height:1.55;color:#c5d0e1;margin:12px 0}.heat-tags{display:flex;gap:6px;flex-wrap:wrap}.heat-tags span{border-radius:99px;background:#1a2a40;padding:5px 9px;color:#bdcbe0;font-size:9px}.heat-detail-actions{display:flex;gap:7px;margin-top:13px}.heat-detail-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #344965;border-radius:8px;padding:8px 6px;font-size:10px;color:#e2ebf8}.heat-detail-actions button:last-child{background:linear-gradient(120deg,#6926d8,#4b1eb3);border-color:#773de2}.heatmap-footnote{display:flex;justify-content:space-between;gap:12px;padding:9px 2px 0;color:#74869f;font-size:9px}.heatmap-footnote span{display:flex;align-items:center;gap:5px}.heat-empty-state{grid-column:1/-1;min-height:260px;border:1px dashed #2d415d;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#9aabc2;text-align:center;padding:22px}.heat-empty-state b{font-size:14px;color:#e2eaf7}.heat-empty-state span{max-width:450px;font-size:11px}.heat-error{padding:9px 12px;margin-bottom:9px;border:1px solid #813b46;border-radius:8px;background:#351922;color:#ffb4bd;font-size:11px}.heat-spin{animation:heatspin 1s linear infinite}@keyframes heatspin{to{transform:rotate(360deg)}}.heatmap-expanded{position:fixed;z-index:60;inset:0;overflow:auto;margin:0;padding:18px;background:#070d19}
+@media(max-width:1200px){.heat-index-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.heat-main-grid{grid-template-columns:minmax(0,1fr) 320px}.heat-sector-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.heat-detail-panel{grid-template-columns:1fr 1.4fr}.heat-company-panel{grid-column:1/-1;border-top:1px solid #1c2b40}}
+@media(max-width:760px){.heatmap-page{margin:-1rem -.75rem 0;padding:9px}.heatmap-heading{align-items:flex-start}.heatmap-title h1{font-size:16px}.heatmap-title p,.heat-clock{display:none}.heat-index-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.heat-toolbar{gap:6px}.heat-view-switch{width:100%;margin:0}.heat-view-switch button{flex:1;padding:0 8px}.heat-select-label{flex:1;justify-content:space-between}.heat-toolbar-search{flex:1}.heat-main-grid{grid-template-columns:1fr}.heat-sector-grid{grid-template-columns:1fr}.heat-side-panel{min-height:240px}.heat-detail-panel{grid-template-columns:1fr}.heat-instrument-summary,.heat-chart-panel,.heat-company-panel{border-right:0;border-bottom:1px solid #1c2b40}.heat-company-panel{grid-column:auto}.heatmap-footnote{flex-direction:column;gap:4px}}
+
+
+/* OpenAlgo theme integration: inherit the application's selected mode/accent. */
+.heatmap-page {
+  --hm-bg: var(--background);
+  --hm-panel: var(--card);
+  --hm-border: var(--border);
+  --hm-muted: var(--muted-foreground);
+  --hm-text: var(--foreground);
+  --hm-primary: var(--primary);
+  color: var(--hm-text);
+  background: var(--hm-bg);
+  margin: 0;
+  padding: 0;
+  min-height: calc(100vh - 5rem);
+  font-size: 13px;
+}
+.heatmap-page .heatmap-title h1,
+.heatmap-page .heat-side-heading h2 { color: var(--foreground); }
+.heatmap-page .heatmap-title p,
+.heatmap-page .heat-clock,
+.heatmap-page .heat-instrument-market,
+.heatmap-page .heat-chart-axis,
+.heatmap-page .heatmap-footnote { color: var(--muted-foreground); }
+.heatmap-page .heat-clock,
+.heatmap-page .heat-icon-button,
+.heatmap-page .heat-index-card,
+.heatmap-page .heat-toolbar,
+.heatmap-page .heat-select-label,
+.heatmap-page .heat-toolbar-search,
+.heatmap-page .heat-side-panel,
+.heatmap-page .heat-detail-panel {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+.heatmap-page .heat-index-card,
+.heatmap-page .heat-toolbar,
+.heatmap-page .heat-side-panel,
+.heatmap-page .heat-detail-panel { color: var(--foreground); }
+.heatmap-page .heat-index-card strong,
+.heatmap-page .heat-instrument-price,
+.heatmap-page .heat-instrument-name,
+.heatmap-page .heat-mover-list b { color: var(--foreground); }
+.heatmap-page .heat-select-label,
+.heatmap-page .heat-select-label select,
+.heatmap-page .heat-toolbar-search input,
+.heatmap-page .heat-icon-button,
+.heatmap-page .heat-mover-controls select,
+.heatmap-page .heat-mover-controls button,
+.heatmap-page .heat-detail-actions button { color: var(--foreground); }
+.heatmap-page .heat-select-label select,
+.heatmap-page .heat-mover-controls select { background-color: transparent; }
+.heatmap-page .heat-select-label option,
+.heatmap-page .heat-mover-controls select option { background: var(--card); color: var(--foreground); }
+.heatmap-page .heat-view-switch button,
+.heatmap-page .heat-side-tabs,
+.heatmap-page .heat-detail-tabs,
+.heatmap-page .heat-mover-controls select,
+.heatmap-page .heat-mover-controls button {
+  background: var(--muted);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+.heatmap-page .heat-view-switch button.active,
+.heatmap-page .heat-chart-periods button.active,
+.heatmap-page .heat-detail-tabs button.active,
+.heatmap-page .heat-detail-actions button:last-child {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: none;
+}
+.heatmap-page .heat-side-tabs button,
+.heatmap-page .heat-detail-tabs button,
+.heatmap-page .heat-chart-periods button { color: var(--muted-foreground); }
+.heatmap-page .heat-side-tabs button.active { background: var(--accent); color: var(--foreground); }
+.heatmap-page .heat-sector-card {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+.heatmap-page .heat-sector-card header,
+.heatmap-page .heat-sector-card header b,
+.heatmap-page .heat-instrument-stats b { color: var(--foreground); }
+.heatmap-page .heat-commodity-table,
+.heatmap-page .heat-table-head,
+.heatmap-page .heat-commodity-table button,
+.heatmap-page .heat-instrument-stats,
+.heatmap-page .heat-chart-grid,
+.heatmap-page .heat-instrument-summary,
+.heatmap-page .heat-chart-panel,
+.heatmap-page .heat-company-panel,
+.heatmap-page .heat-mover-list button { border-color: var(--border); }
+.heatmap-page .heat-table-head,
+.heatmap-page .heat-commodity-table button,
+.heatmap-page .heat-mover-controls select,
+.heatmap-page .heat-mover-controls button { background: var(--muted); color: var(--foreground); }
+.heatmap-page .heat-commodity-table button span,
+.heatmap-page .heat-mover-list small,
+.heatmap-page .heat-company-panel p,
+.heatmap-page .heat-chart-empty { color: var(--muted-foreground); }
+.heatmap-page .heat-instrument-name b,
+.heatmap-page .heat-tags span { background: var(--muted); color: var(--foreground); }
+.heatmap-page .heat-detail-actions button { border-color: var(--border); }
+.heatmap-page .heat-empty-state,
+.heatmap-page .heat-side-empty { border-color: var(--border); color: var(--muted-foreground); }
+.heatmap-page .heat-empty-state b { color: var(--foreground); }
+.heatmap-page .heat-error { border-color: hsl(var(--destructive)); background: color-mix(in oklab, var(--destructive) 12%, var(--card)); color: var(--destructive); }
+.heatmap-page .heat-live-pill.is-live { color: hsl(var(--profit)); background: color-mix(in oklab, hsl(var(--profit)) 12%, var(--card)); }
+.heatmap-page .heat-live-pill.is-waiting { color: hsl(var(--sell)); background: color-mix(in oklab, hsl(var(--sell)) 12%, var(--card)); }
+.heatmap-page .heat-tile-selected { outline-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.heatmap-page .heat-chart-line { stroke: hsl(var(--profit)); }
+.heatmap-page .heatmap-expanded { background: var(--background); }
+@media (max-width: 760px) {
+  .heatmap-page { padding: 0; }
+}
