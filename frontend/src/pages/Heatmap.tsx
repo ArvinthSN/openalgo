@@ -131,13 +131,16 @@ export default function Heatmap() {
       const [companyPayload, commodityPayload, indexPayload] = await Promise.all([companyResponse.json(), commodityResponse.json(), indexResponse.json()])
       const list: Asset[] = companyPayload.data ?? []
       const commodities: Asset[] = commodityPayload.data ?? []
+      const indices: Asset[] = indexPayload.data ?? []
+      setCommodityData(commodities)
+      setIndexData(indices)
       setAssets(view === 'companies' ? list.filter(a => a.asset_type !== 'index') : commodities)
       if (!selected) {
         const initial = view === 'companies' ? list.find(a => a.asset_type === 'company') ?? list[0] : commodities[0]
         if (initial) setSelected(initial)
       }
       if (selected) {
-        const updated = [...list, ...commodities].find(a => a.symbol === selected.symbol && a.exchange === selected.exchange)
+        const updated = [...list, ...commodities, ...indices].find(a => a.symbol === selected.symbol && a.exchange === selected.exchange)
         if (updated) setSelected(updated)
       }
     } catch (err) {
@@ -214,9 +217,24 @@ export default function Heatmap() {
     }
   }
 
+  const refreshMarketData = async () => {
+    setRefreshing(true)
+    try {
+      const response = await fetch(`${API}/refresh`, { credentials: 'same-origin' })
+      const payload = await response.json()
+      if (!response.ok || payload.status !== 'success') throw new Error(payload.message || 'Market refresh failed')
+      await Promise.all([loadSnapshot(true), loadMovers(), selected ? loadHistory(selected) : Promise.resolve()])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Market data refresh failed')
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
   useEffect(() => { setWatchlisted(false) }, [selected?.symbol, selected?.exchange])
 
   useEffect(() => { void loadSnapshot() }, [market, view, period])
+  useEffect(() => { void refreshMarketData(); const timer = window.setInterval(() => void refreshMarketData(), 300000); return () => window.clearInterval(timer) }, [])
   useEffect(() => { void loadMovers() }, [moverMarket, moverDirection])
   useEffect(() => { void loadHistory(selected) }, [selected?.symbol, selected?.exchange, period])
 
@@ -233,15 +251,15 @@ export default function Heatmap() {
     return [...map.entries()]
   }, [filteredAssets, groupBy])
 
-  const commodityAssets = assets.filter(a => a.asset_type === 'commodity')
-  const indices = assets.filter(a => a.asset_type === 'index')
-  const marketStatus = assets.some(a => a.last_price != null) ? 'Connected data' : 'Waiting for provider data'
+  const commodityAssets = commodityData
+  const indices = indexData
+  const marketStatus = [...assets, ...commodityData, ...indexData].some(a => a.last_price != null) ? 'Connected data' : 'Waiting for provider data'
 
   return (
     <div className={cn('heatmap-page', expanded && 'heatmap-expanded')}>
       <div className="heatmap-heading">
         <div className="heatmap-title"><span className="heatmap-globe">🌐</span><div><h1>Global Market Heatmap</h1><p>World equities and commodities · Interactive market overview</p></div><span className={cn('heat-live-pill', marketStatus === 'Connected data' ? 'is-live' : 'is-waiting')}><i />{marketStatus}</span></div>
-        <div className="heatmap-heading-actions"><span className="heat-clock">UTC +05:30 · {new Date().toLocaleString()}</span><button className="heat-icon-button" onClick={() => void loadSnapshot(true)} title="Refresh market data"><RefreshCw size={16} className={refreshing ? 'heat-spin' : ''} /></button></div>
+        <div className="heatmap-heading-actions"><span className="heat-clock">UTC +05:30 · {new Date().toLocaleString()}</span><button className="heat-icon-button" onClick={() => void refreshMarketData()} title="Refresh market data"><RefreshCw size={16} className={refreshing ? 'heat-spin' : ''} /></button></div>
       </div>
 
       <div className="heat-index-strip">
