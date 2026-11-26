@@ -48,7 +48,11 @@ const INDIA_FEED_SYMBOLS = [
   'ITC', 'LT', 'HINDUNILVR', 'AXISBANK', 'KOTAKBANK', 'BAJFINANCE', 'MARUTI',
   'SUNPHARMA', 'TITAN', 'NTPC', 'POWERGRID', 'ONGC', 'TATAMOTORS', 'M&M',
   'ULTRACEMCO', 'ADANIENT', 'ASIANPAINT', 'WIPRO', 'HCLTECH', 'NESTLEIND', 'JSWSTEEL',
-].map(symbol => ({ symbol, exchange: 'NSE' }));
+].map(symbol => ({ symbol, exchange: 'NSE' })).concat([
+  { symbol: 'NIFTY', exchange: 'NSE_INDEX' },
+  { symbol: 'BANKNIFTY', exchange: 'NSE_INDEX' },
+  { symbol: 'SENSEX', exchange: 'BSE_INDEX' },
+]);
 
 
 const fmtPrice = (value?: number | null, currency?: string | null) => {
@@ -265,6 +269,7 @@ export default function Heatmap() {
     setAssets(previous => previous.map(mergeLive))
     setMovers(previous => previous.map(mergeLive))
     setSelected(previous => previous ? mergeLive(previous) : previous)
+    setIndexData(previous => previous.map(mergeLive))
   }, [indiaFeed.data])
 
   useEffect(() => { setWatchlisted(false) }, [selected?.symbol, selected?.exchange])
@@ -290,7 +295,7 @@ export default function Heatmap() {
   }, [filteredAssets, groupBy])
 
   const commodityAssets = commodityData
-  const indices = indexData
+  const indices = indexData.filter(index => market === 'INDIA' ? index.market === 'INDIA' : index.market === 'GLOBAL')
   const indiaLive = Array.from(indiaFeed.data.values()).some(item => item.updateSource === 'websocket' && item.lastUpdate != null && Date.now() - item.lastUpdate < 60000)
   const marketStatus = (streamStatus === 'live' && market === 'GLOBAL') || (indiaLive && market === 'INDIA') ? 'LIVE' : [...assets, ...commodityData, ...indexData].some(a => a.last_price != null) ? 'Data available' : 'Waiting for provider data'
 
