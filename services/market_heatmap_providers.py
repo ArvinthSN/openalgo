@@ -14,7 +14,8 @@ from typing import Any
 import requests
 
 from database.auth_db import get_api_key_for_tradingview
-from database.market_heatmap_db import init_market_heatmap_db, save_snapshot, upsert_instrument
+from database.market_heatmap_db import get_history, get_instrument_detail, init_market_heatmap_db, save_candles, save_snapshot, upsert_instrument
+from services.history_service import get_history as fetch_broker_history
 from services.quotes_service import get_multiquotes
 from utils.logging import get_logger
 
@@ -72,7 +73,7 @@ _refresh_results: dict[str, dict[str, Any]] = {}
 def _as_float(value: Any) -> float | None:
     try:
         number = float(value)
-        return number if number > 0 else None
+        return number if number == number and abs(number) != float('inf') else None
     except (TypeError, ValueError):
         return None
 
@@ -113,7 +114,7 @@ def _td_quote_map(symbols: list[str]) -> dict[str, dict[str, Any]]:
 def _save_td_item(item: dict[str, Any], quote: dict[str, Any], *, market: str,
                   asset_type: str, sector: str | None = None, country: str | None = None) -> bool:
     price = _as_float(quote.get("close") or quote.get("price") or quote.get("last"))
-    if price is None:
+    if price is None or price <= 0:
         return False
     previous = _as_float(quote.get("previous_close"))
     change = _as_float(quote.get("change"))
@@ -227,6 +228,70 @@ def refresh_india(username: str) -> dict[str, Any]:
         updated += 1
     return {"status": "success" if updated else "empty", "updated": updated,
             "provider": "openalgo", "message": None if updated else "Broker returned no usable quotes."}
+
+
+def refresh_instrument_history(username: str, symbol: str, exchange: str, timeframe: str, limit: int = 250) -> int:
+    """Fetch missing chart history on demand and persist normalized OHLCV bars."""
+    instrument = get_instrument_detail(symbol, exchange)
+    if not instrument:
+        return 0
+    timeframe = timeframe.upper()
+    existing = get_history(symbol, exchange, timeframe, limit)
+    if len(existing) >= min(limit, 20):
+        return len(existing)
+
+    intervals = {
+        "1M": ("1min", "1m", 7), "5M": ("5min", "5m", 10),
+        "15M": ("15min", "15m", 30), "30M": ("30min", "30m", 45),
+        "1H": ("1h", "1h", 90), "1D": ("1day", "D", 400),
+        "1W": ("1week", "W", 1500),
+    }
+    if timeframe not in intervals:
+        return len(existing)
+    td_interval, broker_interval, days = intervals[timeframe]
+    end = datetime.now(UTC)
+    start = end - __import__("datetime").timedelta(days=days)
+
+    if instrument["market"] in {"GLOBAL", "COMMODITY"}:
+        quote_symbol = instrument["symbol"]
+        params = {"symbol": quote_symbol, "interval": td_interval, "outputsize": min(limit, 5000)}
+        if instrument.get("exchange") and instrument["exchange"] != "TwelveData":
+            params["exchange"] = instrument["exchange"]
+        payload = _td_get("time_series", params)
+        values = payload.get("values", []) if isinstance(payload, dict) else []
+        candles = [{
+            "time": row.get("datetime"), "open": float(row["open"]),
+            "high": float(row["high"]), "low": float(row["low"]),
+            "close": float(row["close"]), "volume": _as_float(row.get("volume")),
+        } for row in values if all(row.get(key) is not None for key in ("datetime", "open", "high", "low", "close"))]
+        return save_candles(symbol, exchange, timeframe, list(reversed(candles)), "twelvedata") if candles else len(existing)
+
+    api_key = get_api_key_for_tradingview(username)
+    if not api_key:
+        return len(existing)
+    success, payload, _ = fetch_broker_history(
+        symbol=symbol, exchange=exchange, interval=broker_interval,
+        start_date=start.strftime("%Y-%m-%d"), end_date=end.strftime("%Y-%m-%d"),
+        api_key=api_key, source="api",
+    )
+    if not success:
+        logger.warning("OpenAlgo history fetch failed for %s:%s: %s", exchange, symbol, payload.get("message"))
+        return len(existing)
+    rows = payload.get("data", [])
+    candles = []
+    for row in rows:
+        candle_time = row.get("timestamp") or row.get("time")
+        if candle_time is None:
+            continue
+        try:
+            candles.append({
+                "time": str(candle_time), "open": float(row["open"]),
+                "high": float(row["high"]), "low": float(row["low"]),
+                "close": float(row["close"]), "volume": _as_float(row.get("volume")),
+            })
+        except (KeyError, TypeError, ValueError):
+            continue
+    return save_candles(symbol, exchange, timeframe, candles, "openalgo") if candles else len(existing)
 
 
 def refresh_for_user(username: str, *, force: bool = False) -> dict[str, Any]:
