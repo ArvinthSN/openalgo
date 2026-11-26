@@ -193,6 +193,8 @@ def save_candles(symbol: str, exchange: str, timeframe: str, candles: list[dict[
 
 
 def get_snapshot(market: str = "ALL", asset_type: str = "ALL", period: str = "1D") -> list[dict[str, Any]]:
+    market = market.upper()
+    asset_type = asset_type.upper()
     filters = []
     params: list[Any] = []
     if market != "ALL":
@@ -200,7 +202,7 @@ def get_snapshot(market: str = "ALL", asset_type: str = "ALL", period: str = "1D
         params.append(market)
     if asset_type != "ALL":
         filters.append("i.asset_type = ?")
-        params.append(asset_type)
+        params.append(asset_type.lower())
     where = f"WHERE {' AND '.join(filters)}" if filters else ""
     with connection() as conn:
         rows = conn.execute(
