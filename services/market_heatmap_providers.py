@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 import threading
 import time
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import requests
@@ -250,7 +250,7 @@ def refresh_instrument_history(username: str, symbol: str, exchange: str, timefr
         return len(existing)
     td_interval, broker_interval, days = intervals[timeframe]
     end = datetime.now(UTC)
-    start = end - __import__("datetime").timedelta(days=days)
+    start = end - timedelta(days=days)
 
     if instrument["market"] in {"GLOBAL", "COMMODITY"}:
         quote_symbol = instrument["symbol"]
@@ -284,6 +284,8 @@ def refresh_instrument_history(username: str, symbol: str, exchange: str, timefr
         if candle_time is None:
             continue
         try:
+            if isinstance(candle_time, (int, float)) or str(candle_time).isdigit():
+                candle_time = datetime.fromtimestamp(float(candle_time), UTC).isoformat()
             candles.append({
                 "time": str(candle_time), "open": float(row["open"]),
                 "high": float(row["high"]), "low": float(row["low"]),
