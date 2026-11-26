@@ -52,6 +52,7 @@ export const navItems: NavItem[] = [
   { href: '/strategy', label: 'Strategies', icon: Boxes, collapseBelow: 'xl' },
   { href: '/logs', label: 'Logs', icon: FileBarChart, collapseBelow: 'xl' },
   { href: '/tools', label: 'Tools', icon: Wrench, collapseBelow: 'xl' },
+  { href: '/heatmap', label: 'Market Heatmap', icon: Grid3X3, collapseBelow: 'xl' },
 ]
 
 // Items shown in mobile bottom navigation
@@ -76,7 +77,6 @@ export const profileMenuItems: NavItem[] = [
   // main navbar on that understanding and a test pins the adjacency, so a new
   // entry goes after it rather than between the two.
   { href: '/action-center', label: 'Action Center', icon: Bell },
-  { href: '/heatmap', label: 'Market Heatmap', icon: Grid3X3 },
   // Agent Config is NOT here. It lives under /admin with the other
   // configuration surfaces. The chat header carries its own settings control,
   // so a configured /agent still has a route back to its settings without this
