@@ -7,7 +7,7 @@ from services.market_heatmap_service import (
     market_movers,
     market_snapshot,
 )
-from services.market_heatmap_providers import refresh_for_user
+from services.market_heatmap_providers import refresh_for_user, refresh_instrument_history
 from utils.session import check_session_validity
 
 market_heatmap_bp = Blueprint("market_heatmap_bp", __name__)
@@ -63,6 +63,12 @@ def instrument_history_route(symbol):
         limit = int(request.args.get("limit", 250))
     except ValueError:
         return jsonify({"status": "error", "message": "limit must be an integer"}), 400
+    username = session.get("user")
+    try:
+        refresh_instrument_history(username, symbol, exchange, timeframe, limit)
+    except Exception:
+        # Return previously persisted candles if a provider is temporarily unavailable.
+        pass
     return jsonify({
         "status": "success",
         "data": instrument_history(symbol, exchange, timeframe, limit),
