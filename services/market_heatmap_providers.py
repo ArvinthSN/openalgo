@@ -43,6 +43,12 @@ GLOBAL_INSTRUMENTS = [
     ("KO", "Coca-Cola", "Consumer Defensive"), ("PEP", "PepsiCo", "Consumer Defensive"),
 ]
 
+INDIA_INDEX_INSTRUMENTS = [
+    ("NIFTY", "NIFTY 50", "NSE_INDEX"),
+    ("BANKNIFTY", "NIFTY Bank", "NSE_INDEX"),
+    ("SENSEX", "BSE Sensex", "BSE_INDEX"),
+]
+
 INDIA_INSTRUMENTS = [
     ("RELIANCE", "Reliance Industries", "Energy"), ("TCS", "Tata Consultancy Services", "Technology"),
     ("HDFCBANK", "HDFC Bank", "Financials"), ("ICICIBANK", "ICICI Bank", "Financials"),
@@ -289,6 +295,7 @@ def refresh_india(username: str) -> dict[str, Any]:
         return {"status": "not_configured", "updated": 0,
                 "message": "Generate an OpenAlgo API key and connect your broker to load Indian quotes."}
     symbols = [{"symbol": symbol, "exchange": "NSE"} for symbol, _, _ in INDIA_INSTRUMENTS]
+    symbols.extend({"symbol": symbol, "exchange": exchange} for symbol, _, exchange in INDIA_INDEX_INSTRUMENTS)
     success, payload, status_code = get_multiquotes(symbols=symbols, api_key=api_key)
     if not success:
         return {"status": "error", "updated": 0,
@@ -317,6 +324,28 @@ def refresh_india(username: str) -> dict[str, Any]:
         })
         save_snapshot({
             "symbol": symbol, "exchange": "NSE", "last_price": price,
+            "previous_close": previous, "change_value": change, "change_percent": percent,
+            "volume": _as_float(quote.get("volume")), "currency": "INR",
+            "source": "openalgo", "as_of": datetime.now(UTC).isoformat(),
+        })
+        updated += 1
+    for symbol, name, exchange in INDIA_INDEX_INSTRUMENTS:
+        quote = by_symbol.get(symbol)
+        if not quote:
+            continue
+        price = _as_float(quote.get("ltp") or quote.get("close") or quote.get("last_price"))
+        if price is None or price <= 0:
+            continue
+        previous = _as_float(quote.get("prev_close") or quote.get("previous_close") or quote.get("close"))
+        change = price - previous if previous else None
+        percent = ((price / previous) - 1) * 100 if previous else None
+        upsert_instrument({
+            "symbol": symbol, "exchange": exchange, "name": name,
+            "asset_type": "index", "market": "INDIA", "country": "India",
+            "currency": "INR", "source": "openalgo",
+        })
+        save_snapshot({
+            "symbol": symbol, "exchange": exchange, "last_price": price,
             "previous_close": previous, "change_value": change, "change_percent": percent,
             "volume": _as_float(quote.get("volume")), "currency": "INR",
             "source": "openalgo", "as_of": datetime.now(UTC).isoformat(),
