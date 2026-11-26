@@ -7,3 +7,120 @@
 .heat-detail-panel{display:grid;grid-template-columns:minmax(230px,.95fr) minmax(300px,1.55fr) minmax(260px,1.05fr);gap:0;margin-top:10px;border:1px solid #263a55;border-radius:13px;background:linear-gradient(145deg,#0c1727,#08111e);overflow:hidden;box-shadow:0 8px 24px #0004}.heat-instrument-summary,.heat-chart-panel,.heat-company-panel{min-width:0;padding:14px;border-right:1px solid #1c2b40}.heat-instrument-market{font-size:10px;color:#8ea1ba}.heat-instrument-name{display:flex;align-items:center;gap:9px;margin:8px 0}.heat-instrument-name b{font-size:17px;background:#1a2940;border-radius:7px;padding:4px 7px}.heat-instrument-name span{font-size:13px;font-weight:700}.heat-instrument-price{font-size:27px;font-weight:850;letter-spacing:-.03em}.heat-instrument-change{font-size:12px;font-weight:800;margin-top:2px}.heat-instrument-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;border-top:1px solid #24354c;margin-top:12px;padding-top:10px}.heat-instrument-stats span{display:flex;flex-direction:column;gap:5px;min-width:0}.heat-instrument-stats small{font-size:10px;color:#8799b1}.heat-instrument-stats b{font-size:11px;overflow:hidden;text-overflow:ellipsis}.heat-detail-no-selection{font-size:12px;color:#92a3ba;padding:20px 0}.heat-chart-panel{display:flex;flex-direction:column}.heat-chart-periods{display:flex;gap:4px}.heat-chart-periods button{padding:5px 9px;border-radius:7px;font-size:10px;color:#b6c4d8}.heat-chart-periods button.active{background:#6324d5;color:white}.heat-chart-svg{width:100%;height:115px;margin-top:9px;overflow:visible}.heat-chart-grid{stroke:#26374e;stroke-width:.45;stroke-dasharray:1 1}.heat-chart-line{fill:none;stroke:#23df83;stroke-width:1.5;vector-effect:non-scaling-stroke}.heat-chart-empty{height:115px;display:flex;align-items:center;justify-content:center;gap:8px;color:#8294ad;font-size:11px}.heat-chart-axis{display:flex;justify-content:space-between;font-size:9px;color:#7f91a9}.heat-company-panel{border-right:0}.heat-detail-tabs{display:flex;justify-content:space-between;gap:4px;border-radius:8px;background:#132137;padding:3px}.heat-detail-tabs button{font-size:10px;padding:6px 7px;border-radius:6px;color:#aebbd0}.heat-detail-tabs button.active{background:#6124d1;color:#fff}.heat-company-panel p{font-size:11px;line-height:1.55;color:#c5d0e1;margin:12px 0}.heat-tags{display:flex;gap:6px;flex-wrap:wrap}.heat-tags span{border-radius:99px;background:#1a2a40;padding:5px 9px;color:#bdcbe0;font-size:9px}.heat-detail-actions{display:flex;gap:7px;margin-top:13px}.heat-detail-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #344965;border-radius:8px;padding:8px 6px;font-size:10px;color:#e2ebf8}.heat-detail-actions button:last-child{background:linear-gradient(120deg,#6926d8,#4b1eb3);border-color:#773de2}.heatmap-footnote{display:flex;justify-content:space-between;gap:12px;padding:9px 2px 0;color:#74869f;font-size:9px}.heatmap-footnote span{display:flex;align-items:center;gap:5px}.heat-empty-state{grid-column:1/-1;min-height:260px;border:1px dashed #2d415d;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#9aabc2;text-align:center;padding:22px}.heat-empty-state b{font-size:14px;color:#e2eaf7}.heat-empty-state span{max-width:450px;font-size:11px}.heat-error{padding:9px 12px;margin-bottom:9px;border:1px solid #813b46;border-radius:8px;background:#351922;color:#ffb4bd;font-size:11px}.heat-spin{animation:heatspin 1s linear infinite}@keyframes heatspin{to{transform:rotate(360deg)}}.heatmap-expanded{position:fixed;z-index:60;inset:0;overflow:auto;margin:0;padding:18px;background:#070d19}
 @media(max-width:1200px){.heat-index-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.heat-main-grid{grid-template-columns:minmax(0,1fr) 320px}.heat-sector-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.heat-detail-panel{grid-template-columns:1fr 1.4fr}.heat-company-panel{grid-column:1/-1;border-top:1px solid #1c2b40}}
 @media(max-width:760px){.heatmap-page{margin:-1rem -.75rem 0;padding:9px}.heatmap-heading{align-items:flex-start}.heatmap-title h1{font-size:16px}.heatmap-title p,.heat-clock{display:none}.heat-index-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.heat-toolbar{gap:6px}.heat-view-switch{width:100%;margin:0}.heat-view-switch button{flex:1;padding:0 8px}.heat-select-label{flex:1;justify-content:space-between}.heat-toolbar-search{flex:1}.heat-main-grid{grid-template-columns:1fr}.heat-sector-grid{grid-template-columns:1fr}.heat-side-panel{min-height:240px}.heat-detail-panel{grid-template-columns:1fr}.heat-instrument-summary,.heat-chart-panel,.heat-company-panel{border-right:0;border-bottom:1px solid #1c2b40}.heat-company-panel{grid-column:auto}.heatmap-footnote{flex-direction:column;gap:4px}}
+
+
+/* OpenAlgo theme integration: inherit the application's selected mode/accent. */
+.heatmap-page {
+  --hm-bg: var(--background);
+  --hm-panel: var(--card);
+  --hm-border: var(--border);
+  --hm-muted: var(--muted-foreground);
+  --hm-text: var(--foreground);
+  --hm-primary: var(--primary);
+  color: var(--hm-text);
+  background: var(--hm-bg);
+  margin: 0;
+  padding: 0;
+  min-height: calc(100vh - 5rem);
+  font-size: 13px;
+}
+.heatmap-page .heatmap-title h1,
+.heatmap-page .heat-side-heading h2 { color: var(--foreground); }
+.heatmap-page .heatmap-title p,
+.heatmap-page .heat-clock,
+.heatmap-page .heat-instrument-market,
+.heatmap-page .heat-chart-axis,
+.heatmap-page .heatmap-footnote { color: var(--muted-foreground); }
+.heatmap-page .heat-clock,
+.heatmap-page .heat-icon-button,
+.heatmap-page .heat-index-card,
+.heatmap-page .heat-toolbar,
+.heatmap-page .heat-select-label,
+.heatmap-page .heat-toolbar-search,
+.heatmap-page .heat-side-panel,
+.heatmap-page .heat-detail-panel {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+.heatmap-page .heat-index-card,
+.heatmap-page .heat-toolbar,
+.heatmap-page .heat-side-panel,
+.heatmap-page .heat-detail-panel { color: var(--foreground); }
+.heatmap-page .heat-index-card strong,
+.heatmap-page .heat-instrument-price,
+.heatmap-page .heat-instrument-name,
+.heatmap-page .heat-mover-list b { color: var(--foreground); }
+.heatmap-page .heat-select-label,
+.heatmap-page .heat-select-label select,
+.heatmap-page .heat-toolbar-search input,
+.heatmap-page .heat-icon-button,
+.heatmap-page .heat-mover-controls select,
+.heatmap-page .heat-mover-controls button,
+.heatmap-page .heat-detail-actions button { color: var(--foreground); }
+.heatmap-page .heat-select-label select,
+.heatmap-page .heat-mover-controls select { background-color: transparent; }
+.heatmap-page .heat-select-label option,
+.heatmap-page .heat-mover-controls select option { background: var(--card); color: var(--foreground); }
+.heatmap-page .heat-view-switch button,
+.heatmap-page .heat-side-tabs,
+.heatmap-page .heat-detail-tabs,
+.heatmap-page .heat-mover-controls select,
+.heatmap-page .heat-mover-controls button {
+  background: var(--muted);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+.heatmap-page .heat-view-switch button.active,
+.heatmap-page .heat-chart-periods button.active,
+.heatmap-page .heat-detail-tabs button.active,
+.heatmap-page .heat-detail-actions button:last-child {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: none;
+}
+.heatmap-page .heat-side-tabs button,
+.heatmap-page .heat-detail-tabs button,
+.heatmap-page .heat-chart-periods button { color: var(--muted-foreground); }
+.heatmap-page .heat-side-tabs button.active { background: var(--accent); color: var(--foreground); }
+.heatmap-page .heat-sector-card {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+.heatmap-page .heat-sector-card header,
+.heatmap-page .heat-sector-card header b,
+.heatmap-page .heat-instrument-stats b { color: var(--foreground); }
+.heatmap-page .heat-commodity-table,
+.heatmap-page .heat-table-head,
+.heatmap-page .heat-commodity-table button,
+.heatmap-page .heat-instrument-stats,
+.heatmap-page .heat-chart-grid,
+.heatmap-page .heat-instrument-summary,
+.heatmap-page .heat-chart-panel,
+.heatmap-page .heat-company-panel,
+.heatmap-page .heat-mover-list button { border-color: var(--border); }
+.heatmap-page .heat-table-head,
+.heatmap-page .heat-commodity-table button,
+.heatmap-page .heat-mover-controls select,
+.heatmap-page .heat-mover-controls button { background: var(--muted); color: var(--foreground); }
+.heatmap-page .heat-commodity-table button span,
+.heatmap-page .heat-mover-list small,
+.heatmap-page .heat-company-panel p,
+.heatmap-page .heat-chart-empty { color: var(--muted-foreground); }
+.heatmap-page .heat-instrument-name b,
+.heatmap-page .heat-tags span { background: var(--muted); color: var(--foreground); }
+.heatmap-page .heat-detail-actions button { border-color: var(--border); }
+.heatmap-page .heat-empty-state,
+.heatmap-page .heat-side-empty { border-color: var(--border); color: var(--muted-foreground); }
+.heatmap-page .heat-empty-state b { color: var(--foreground); }
+.heatmap-page .heat-error { border-color: hsl(var(--destructive)); background: color-mix(in oklab, var(--destructive) 12%, var(--card)); color: var(--destructive); }
+.heatmap-page .heat-live-pill.is-live { color: hsl(var(--profit)); background: color-mix(in oklab, hsl(var(--profit)) 12%, var(--card)); }
+.heatmap-page .heat-live-pill.is-waiting { color: hsl(var(--sell)); background: color-mix(in oklab, hsl(var(--sell)) 12%, var(--card)); }
+.heatmap-page .heat-tile-selected { outline-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.heatmap-page .heat-chart-line { stroke: hsl(var(--profit)); }
+.heatmap-page .heatmap-expanded { background: var(--background); }
+@media (max-width: 760px) {
+  .heatmap-page { padding: 0; }
+}
