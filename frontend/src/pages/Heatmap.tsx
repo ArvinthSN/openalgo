@@ -96,6 +96,8 @@ function MiniChart({ candles }: { candles: Candle[] }) {
 
 export default function Heatmap() {
   const [assets, setAssets] = useState<Asset[]>([])
+  const [commodityData, setCommodityData] = useState<Asset[]>([])
+  const [indexData, setIndexData] = useState<Asset[]>([])
   const [movers, setMovers] = useState<Asset[]>([])
   const [candles, setCandles] = useState<Candle[]>([])
   const [market, setMarket] = useState<'INDIA' | 'GLOBAL'>('GLOBAL')
@@ -119,12 +121,13 @@ export default function Heatmap() {
     if (quiet) setRefreshing(true); else setLoading(true)
     setError('')
     try {
-      const [companyResponse, commodityResponse] = await Promise.all([
+      const [companyResponse, commodityResponse, indexResponse] = await Promise.all([
         fetch(`${API}/snapshot?${queryString({ market, asset_type: view === 'companies' ? 'COMPANY' : 'COMMODITY', period })}`, { credentials: 'same-origin' }),
         fetch(`${API}/snapshot?${queryString({ market: 'COMMODITY', asset_type: 'COMMODITY', period })}`, { credentials: 'same-origin' }),
+        fetch(`${API}/snapshot?${queryString({ market: 'ALL', asset_type: 'INDEX', period })}`, { credentials: 'same-origin' }),
       ])
-      if (!companyResponse.ok || !commodityResponse.ok) throw new Error('Unable to load market heatmap data. Please sign in again or retry.')
-      const [companyPayload, commodityPayload] = await Promise.all([companyResponse.json(), commodityResponse.json()])
+      if (!companyResponse.ok || !commodityResponse.ok || !indexResponse.ok) throw new Error('Unable to load market heatmap data. Please sign in again or retry.')
+      const [companyPayload, commodityPayload, indexPayload] = await Promise.all([companyResponse.json(), commodityResponse.json(), indexResponse.json()])
       const list: Asset[] = companyPayload.data ?? []
       const commodities: Asset[] = commodityPayload.data ?? []
       setAssets(view === 'companies' ? list.filter(a => a.asset_type !== 'index') : commodities)
