@@ -1,5 +1,5 @@
 """Session-authenticated Market Heatmap read API."""
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 
 from services.market_heatmap_service import (
     instrument_detail,
@@ -7,6 +7,7 @@ from services.market_heatmap_service import (
     market_movers,
     market_snapshot,
 )
+from services.market_heatmap_providers import refresh_for_user
 from utils.session import check_session_validity
 
 market_heatmap_bp = Blueprint("market_heatmap_bp", __name__)
@@ -66,3 +67,17 @@ def instrument_history_route(symbol):
         "status": "success",
         "data": instrument_history(symbol, exchange, timeframe, limit),
     })
+
+
+
+@market_heatmap_bp.post("/market-heatmap/api/refresh")
+@check_session_validity
+def refresh():
+    """Fetch fresh quotes using the configured Twelve Data and logged-in broker feeds."""
+    username = session.get("user")
+    if not username:
+        return jsonify({"status": "error", "message": "A signed-in user is required"}), 401
+    try:
+        return jsonify(refresh_for_user(username, force=True))
+    except Exception as exc:
+        return jsonify({"status": "error", "message": str(exc)}), 502
