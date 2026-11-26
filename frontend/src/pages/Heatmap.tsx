@@ -4,6 +4,7 @@ import {
   Gem, Globe2, Layers3, RefreshCw, Search, Star, X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useMarketData } from '@/hooks/useMarketData'
 import './Heatmap.css'
 
 type Market = 'ALL' | 'INDIA' | 'GLOBAL' | 'COMMODITY'
@@ -41,6 +42,14 @@ interface Candle {
 
 const API = '/market-heatmap/api'
 const PERIODS: Period[] = ['1D', '1W', '1M', '3M', '1Y']
+
+const INDIA_FEED_SYMBOLS = [
+  'RELIANCE', 'TCS', 'HDFCBANK', 'ICICIBANK', 'INFY', 'BHARTIARTL', 'SBIN',
+  'ITC', 'LT', 'HINDUNILVR', 'AXISBANK', 'KOTAKBANK', 'BAJFINANCE', 'MARUTI',
+  'SUNPHARMA', 'TITAN', 'NTPC', 'POWERGRID', 'ONGC', 'TATAMOTORS', 'M&M',
+  'ULTRACEMCO', 'ADANIENT', 'ASIANPAINT', 'WIPRO', 'HCLTECH', 'NESTLEIND', 'JSWSTEEL',
+].map(symbol => ({ symbol, exchange: 'NSE' }));
+
 
 const fmtPrice = (value?: number | null, currency?: string | null) => {
   if (value == null || !Number.isFinite(value)) return '—'
@@ -118,6 +127,7 @@ export default function Heatmap() {
   const [watchlisted, setWatchlisted] = useState(false)
   const [watchlistBusy, setWatchlistBusy] = useState(false)
   const [streamStatus, setStreamStatus] = useState('stopped')
+  const indiaFeed = useMarketData({ symbols: INDIA_FEED_SYMBOLS, mode: 'Quote', enabled: market === 'INDIA' || moverMarket === 'INDIA' })
 
   const loadSnapshot = async (quiet = false) => {
     if (quiet) setRefreshing(true); else setLoading(true)
@@ -233,6 +243,29 @@ export default function Heatmap() {
     }
   }
 
+  useEffect(() => {
+    if (!indiaFeed.data.size) return
+    const liveQuotes = new Map(Array.from(indiaFeed.data.values()).map(item => [
+      `${item.exchange}:${item.symbol}`,
+      item.data,
+    ]))
+    const mergeLive = (asset: Asset): Asset => {
+      const quote = liveQuotes.get(`${asset.exchange}:${asset.symbol}`)
+      if (!quote) return asset
+      return {
+        ...asset,
+        last_price: quote.ltp ?? asset.last_price,
+        previous_close: quote.close ?? asset.previous_close,
+        change_value: quote.change ?? asset.change_value,
+        change_percent: quote.change_percent ?? asset.change_percent,
+        volume: quote.volume ?? asset.volume,
+      }
+    }
+    setAssets(previous => previous.map(mergeLive))
+    setMovers(previous => previous.map(mergeLive))
+    setSelected(previous => previous ? mergeLive(previous) : previous)
+  }, [indiaFeed.data])
+
   useEffect(() => { setWatchlisted(false) }, [selected?.symbol, selected?.exchange])
 
   useEffect(() => { void loadSnapshot() }, [market, view, period])
@@ -257,7 +290,8 @@ export default function Heatmap() {
 
   const commodityAssets = commodityData
   const indices = indexData
-  const marketStatus = streamStatus === 'live' ? 'LIVE' : [...assets, ...commodityData, ...indexData].some(a => a.last_price != null) ? 'Data available' : 'Waiting for provider data'
+  const indiaLive = Array.from(indiaFeed.data.values()).some(item => item.updateSource === 'websocket' && item.lastUpdate != null && Date.now() - item.lastUpdate < 60000)
+  const marketStatus = (streamStatus === 'live' && market === 'GLOBAL') || (indiaLive && market === 'INDIA') ? 'LIVE' : [...assets, ...commodityData, ...indexData].some(a => a.last_price != null) ? 'Data available' : 'Waiting for provider data'
 
   return (
     <div className={cn('heatmap-page', expanded && 'heatmap-expanded')}>
