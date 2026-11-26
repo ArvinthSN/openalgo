@@ -59,4 +59,4 @@ def test_history_upsert_and_period_return(heatmap_store):
     history = db.get_history("XYZ", "NASDAQ", "1D")
     assert len(history) == 7
     snapshot = db.get_snapshot("GLOBAL", "company", "1W")
-    assert snapshot[0]["change_percent"] == pytest.approx(6.0)
+    assert snapshot[0]["change_percent"] == pytest.approx((106 / 101 - 1) * 100)
