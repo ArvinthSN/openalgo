@@ -245,19 +245,20 @@ export default function Heatmap() {
 
   useEffect(() => {
     if (!indiaFeed.data.size) return
-    const liveQuotes = new Map(Array.from(indiaFeed.data.values()).map(item => [
-      `${item.exchange}:${item.symbol}`,
-      item.data,
-    ]))
+    const liveQuotes = Array.from(indiaFeed.data.values())
     const mergeLive = (asset: Asset): Asset => {
-      const quote = liveQuotes.get(`${asset.exchange}:${asset.symbol}`)
-      if (!quote) return asset
+      const tick = liveQuotes.find(item => item.exchange === asset.exchange && item.symbol === asset.symbol)
+      if (!tick) return asset
+      const quote = tick.data
+      const previousClose = quote.close ?? asset.previous_close
+      const changeValue = quote.change ?? (quote.ltp != null && previousClose != null ? quote.ltp - previousClose : asset.change_value)
+      const changePercent = quote.change_percent ?? (quote.ltp != null && previousClose ? ((quote.ltp / previousClose) - 1) * 100 : asset.change_percent)
       return {
         ...asset,
         last_price: quote.ltp ?? asset.last_price,
-        previous_close: quote.close ?? asset.previous_close,
-        change_value: quote.change ?? asset.change_value,
-        change_percent: quote.change_percent ?? asset.change_percent,
+        previous_close: previousClose,
+        change_value: changeValue,
+        change_percent: changePercent,
         volume: quote.volume ?? asset.volume,
       }
     }
