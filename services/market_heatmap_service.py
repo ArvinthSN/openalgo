@@ -10,7 +10,7 @@ from database.market_heatmap_db import (
 def market_snapshot(market="ALL", asset_type="ALL", period="1D"):
     return {
         "status": "success",
-        "data": get_snapshot(market=market, asset_type=asset_type, period=period),
+        "data": get_snapshot(market=market.upper(), asset_type=asset_type.lower(), period=period),
         "meta": {"market": market, "asset_type": asset_type, "period": period},
     }
 
