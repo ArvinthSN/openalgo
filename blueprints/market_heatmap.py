@@ -17,7 +17,7 @@ market_heatmap_bp = Blueprint("market_heatmap_bp", __name__)
 @check_session_validity
 def snapshot():
     market = (request.args.get("market") or "ALL").upper()
-    asset_type = (request.args.get("asset_type") or "ALL").lower()
+    asset_type = (request.args.get("asset_type") or "ALL").upper()
     period = (request.args.get("period") or "1D").upper()
     if market not in {"ALL", "INDIA", "GLOBAL", "COMMODITY"}:
         return jsonify({"status": "error", "message": "Unsupported market filter"}), 400
