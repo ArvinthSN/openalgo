@@ -142,7 +142,16 @@ export default function Heatmap() {
         fetch(`${API}/snapshot?${queryString({ market: 'COMMODITY', asset_type: 'COMMODITY', period })}`, { credentials: 'same-origin' }),
         fetch(`${API}/snapshot?${queryString({ market: 'ALL', asset_type: 'INDEX', period })}`, { credentials: 'same-origin' }),
       ])
-      if (!companyResponse.ok || !commodityResponse.ok || !indexResponse.ok) throw new Error('Unable to load market heatmap data. Please sign in again or retry.')
+      const failedResponse = [companyResponse, commodityResponse, indexResponse].find(response => !response.ok)
+      if (failedResponse) {
+        if (failedResponse.status === 404) {
+          throw new Error('Market Heatmap API route returned 404. Restart OpenAlgo from the updated feat/market-heatmap-mvp branch and confirm the backend is running from this repository.')
+        }
+        if (failedResponse.status === 401) {
+          throw new Error('Your OpenAlgo session has expired. Sign in again and reload the Heatmap.')
+        }
+        throw new Error(`Unable to load market heatmap data (HTTP ${failedResponse.status}). Please retry.`)
+      }
       const [companyPayload, commodityPayload, indexPayload] = await Promise.all([companyResponse.json(), commodityResponse.json(), indexResponse.json()])
       const list: Asset[] = companyPayload.data ?? []
       const commodities: Asset[] = commodityPayload.data ?? []
