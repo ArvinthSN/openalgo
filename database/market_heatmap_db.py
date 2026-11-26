@@ -222,7 +222,38 @@ def get_snapshot(market: str = "ALL", asset_type: str = "ALL", period: str = "1D
             """,
             params,
         ).fetchall()
-        return [dict(row) for row in rows]
+        result = [dict(row) for row in rows]
+        # Longer-period returns come from persisted daily candles. Missing
+        # history stays null; it is never replaced with a 1D return.
+        offsets = {"1W": 5, "1M": 21, "3M": 63, "1Y": 252}
+        offset = offsets.get(period)
+        if offset:
+            for item in result:
+                history = conn.execute(
+                    """
+                    SELECT close FROM historical_prices h
+                    JOIN instruments i ON i.id=h.instrument_id
+                    WHERE i.symbol=? AND i.exchange=? AND h.timeframe='1D'
+                    ORDER BY h.candle_time DESC LIMIT 1 OFFSET ?
+                    """,
+                    (item["symbol"], item["exchange"], offset),
+                ).fetchone()
+                latest = conn.execute(
+                    """
+                    SELECT close FROM historical_prices h
+                    JOIN instruments i ON i.id=h.instrument_id
+                    WHERE i.symbol=? AND i.exchange=? AND h.timeframe='1D'
+                    ORDER BY h.candle_time DESC LIMIT 1
+                    """,
+                    (item["symbol"], item["exchange"]),
+                ).fetchone()
+                if history and latest and history["close"]:
+                    item["change_value"] = latest["close"] - history["close"]
+                    item["change_percent"] = ((latest["close"] / history["close"]) - 1) * 100
+                else:
+                    item["change_value"] = None
+                    item["change_percent"] = None
+        return result
 
 
 def get_movers(market: str, direction: str, limit: int = 10) -> list[dict[str, Any]]:
