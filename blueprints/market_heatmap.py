@@ -78,6 +78,6 @@ def refresh():
     if not username:
         return jsonify({"status": "error", "message": "A signed-in user is required"}), 401
     try:
-        return jsonify(refresh_for_user(username, force=True))
+        return jsonify(refresh_for_user(username))
     except Exception as exc:
         return jsonify({"status": "error", "message": str(exc)}), 502
