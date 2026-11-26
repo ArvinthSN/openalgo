@@ -7,7 +7,7 @@ from services.market_heatmap_service import (
     market_movers,
     market_snapshot,
 )
-from services.market_heatmap_providers import refresh_for_user, refresh_instrument_history
+from services.market_heatmap_providers import market_data_status, refresh_for_user, refresh_instrument_history
 from utils.session import check_session_validity
 
 market_heatmap_bp = Blueprint("market_heatmap_bp", __name__)
@@ -87,3 +87,10 @@ def refresh():
         return jsonify(refresh_for_user(username))
     except Exception as exc:
         return jsonify({"status": "error", "message": str(exc)}), 502
+
+
+
+@market_heatmap_bp.get("/market-heatmap/api/status")
+@check_session_validity
+def status():
+    return jsonify({"status": "success", "data": market_data_status()})
