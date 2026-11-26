@@ -71,3 +71,9 @@ def test_india_refresh_normalizes_broker_quotes(monkeypatch):
     assert saved_instruments[0]["symbol"] == "RELIANCE"
     assert saved_snapshots[0]["currency"] == "INR"
     assert saved_snapshots[0]["change_percent"] == 4.166666666666667
+
+
+
+def test_numeric_normalizer_keeps_negative_price_changes():
+    assert providers._as_float("-1.25") == -1.25
+    assert providers._as_float("not-a-number") is None
