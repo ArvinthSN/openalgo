@@ -5,6 +5,7 @@ catalog below contains reference metadata only; it never contains quote prices.
 """
 from __future__ import annotations
 
+import json
 import os
 import threading
 import time
@@ -12,9 +13,10 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import requests
+import websocket
 
 from database.auth_db import get_api_key_for_tradingview
-from database.market_heatmap_db import get_history, get_instrument_detail, init_market_heatmap_db, save_candles, save_snapshot, upsert_instrument
+from database.market_heatmap_db import get_history, get_instrument_detail, get_snapshot, init_market_heatmap_db, save_candles, save_snapshot, upsert_instrument
 from services.history_service import get_history as fetch_broker_history
 from services.quotes_service import get_multiquotes
 from utils.logging import get_logger
@@ -68,6 +70,11 @@ INDEX_INSTRUMENTS = [
 _refresh_lock = threading.Lock()
 _last_refresh: dict[str, float] = {}
 _refresh_results: dict[str, dict[str, Any]] = {}
+_stream_lock = threading.Lock()
+_stream_thread: threading.Thread | None = None
+_stream_stop = threading.Event()
+_stream_symbols: list[str] = []
+_stream_status = {"status": "stopped", "last_tick_at": None, "error": None}
 
 
 def _as_float(value: Any) -> float | None:
@@ -144,6 +151,92 @@ def _save_td_item(item: dict[str, Any], quote: dict[str, Any], *, market: str,
     return True
 
 
+
+def _persist_stream_tick(message: dict[str, Any]) -> None:
+    symbol = str(message.get("symbol") or "").upper()
+    price = _as_float(message.get("price"))
+    if not symbol or price is None or price <= 0:
+        return
+    instrument = next((row for row in get_snapshot() if row["symbol"].upper() == symbol), None)
+    if not instrument:
+        return
+    previous = _as_float(instrument.get("previous_close"))
+    change = price - previous if previous else None
+    percent = ((price / previous) - 1) * 100 if previous else None
+    stamp = message.get("timestamp")
+    try:
+        as_of = datetime.fromtimestamp(float(stamp), UTC).isoformat() if stamp else datetime.now(UTC).isoformat()
+    except (TypeError, ValueError, OSError):
+        as_of = datetime.now(UTC).isoformat()
+    save_snapshot({
+        "symbol": symbol, "exchange": instrument["exchange"], "last_price": price,
+        "previous_close": previous, "change_value": change, "change_percent": percent,
+        "volume": _as_float(message.get("day_volume")) or instrument.get("volume"),
+        "currency": instrument.get("currency"), "source": "twelvedata_ws", "as_of": as_of,
+    })
+    _stream_status["last_tick_at"] = as_of
+
+
+def _twelvedata_stream_loop() -> None:
+    api_key = os.getenv("TWELVEDATA_API_KEY", "").strip()
+    url = "wss://ws.twelvedata.com/v1/quotes/price?apikey=" + api_key
+    while not _stream_stop.is_set():
+        def on_open(ws):
+            _stream_status.update({"status": "connected", "error": None})
+            if _stream_symbols:
+                ws.send(json.dumps({
+                    "action": "subscribe", "params": {"symbols": ",".join(_stream_symbols)}
+                }))
+
+        def on_message(ws, raw):
+            try:
+                message = json.loads(raw)
+                if isinstance(message, dict) and message.get("event") == "price":
+                    _persist_stream_tick(message)
+                elif isinstance(message, dict) and message.get("status") == "error":
+                    _stream_status["error"] = message.get("message", "Provider stream error")
+            except Exception as exc:
+                logger.warning("Unable to process Twelve Data stream message: %s", exc)
+
+        def on_error(ws, error):
+            _stream_status.update({"status": "error", "error": str(error)})
+
+        def on_close(ws, code, reason):
+            if not _stream_stop.is_set():
+                _stream_status["status"] = "reconnecting"
+
+        try:
+            app = websocket.WebSocketApp(
+                url, on_open=on_open, on_message=on_message,
+                on_error=on_error, on_close=on_close,
+            )
+            app.run_forever(ping_interval=20, ping_timeout=10)
+        except Exception as exc:
+            _stream_status.update({"status": "error", "error": str(exc)})
+            logger.warning("Twelve Data WebSocket stopped: %s", exc)
+        if not _stream_stop.is_set():
+            _stream_stop.wait(5)
+    _stream_status["status"] = "stopped"
+
+
+def start_twelvedata_stream(symbols: list[str]) -> dict[str, Any]:
+    """Start one reconnecting server-side stream for the current provider symbol set."""
+    global _stream_thread, _stream_symbols
+    api_key = os.getenv("TWELVEDATA_API_KEY", "").strip()
+    if not api_key:
+        return {"status": "not_configured", "message": "TWELVEDATA_API_KEY is not configured"}
+    with _stream_lock:
+        _stream_symbols = list(dict.fromkeys(symbols))
+        if _stream_thread and _stream_thread.is_alive():
+            return {**_stream_status, "symbols": len(_stream_symbols)}
+        _stream_stop.clear()
+        _stream_thread = threading.Thread(
+            target=_twelvedata_stream_loop, name="market-heatmap-twelvedata", daemon=True
+        )
+        _stream_thread.start()
+    return {"status": "connecting", "symbols": len(_stream_symbols)}
+
+
 def refresh_global() -> dict[str, Any]:
     """Fetch global company, index and commodity quotes from Twelve Data."""
     symbols = [row[0] for row in GLOBAL_INSTRUMENTS + INDEX_INSTRUMENTS]
@@ -175,7 +268,8 @@ def refresh_global() -> dict[str, Any]:
         and any(word in str(row.get("name", "")).lower() for word in wanted)
         and row.get("symbol")
     ][:8]
-    commodity_quotes = _td_quote_map([item["symbol"] for item in commodities])
+    commodity_symbols = [item["symbol"] for item in commodities]
+    commodity_quotes = _td_quote_map(commodity_symbols)
     for item in commodities:
         quote = commodity_quotes.get(item["symbol"].upper())
         if quote:
@@ -183,7 +277,9 @@ def refresh_global() -> dict[str, Any]:
                 item, quote, market="COMMODITY", asset_type="commodity",
                 sector=item.get("category"), country="Global",
             )
-    return {"status": "success", "updated": updated, "provider": "twelvedata"}
+    stream = start_twelvedata_stream(symbols + commodity_symbols)
+    return {"status": "success", "updated": updated, "provider": "twelvedata",
+            "stream": stream}
 
 
 def refresh_india(username: str) -> dict[str, Any]:
