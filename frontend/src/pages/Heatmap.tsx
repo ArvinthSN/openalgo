@@ -257,7 +257,7 @@ export default function Heatmap() {
 
   const commodityAssets = commodityData
   const indices = indexData
-  const marketStatus = streamStatus === 'connected' ? 'LIVE' : [...assets, ...commodityData, ...indexData].some(a => a.last_price != null) ? 'Data available' : 'Waiting for provider data'
+  const marketStatus = streamStatus === 'live' ? 'LIVE' : [...assets, ...commodityData, ...indexData].some(a => a.last_price != null) ? 'Data available' : 'Waiting for provider data'
 
   return (
     <div className={cn('heatmap-page', expanded && 'heatmap-expanded')}>
