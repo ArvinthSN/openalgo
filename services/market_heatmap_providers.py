@@ -425,10 +425,20 @@ def refresh_for_user(username: str, *, force: bool = False) -> dict[str, Any]:
 
 def market_data_status() -> dict[str, Any]:
     """Expose provider connection state without leaking credentials."""
+    last_tick = _stream_status.get("last_tick_at")
+    live = False
+    if last_tick:
+        try:
+            tick_time = datetime.fromisoformat(last_tick)
+            live = (datetime.now(UTC) - tick_time).total_seconds() <= 60
+        except ValueError:
+            live = False
+    status = "live" if _stream_status.get("status") == "connected" and live else _stream_status.get("status")
     return {
         "twelvedata": {
             "configured": bool(os.getenv("TWELVEDATA_API_KEY", "").strip()),
             **_stream_status,
+            "status": status,
             "subscribed_symbols": len(_stream_symbols),
         }
     }
