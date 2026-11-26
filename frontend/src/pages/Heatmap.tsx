@@ -238,7 +238,7 @@ export default function Heatmap() {
   useEffect(() => { void loadSnapshot() }, [market, view, period])
   useEffect(() => { const timer = window.setInterval(() => { void loadSnapshot(true); void loadMovers() }, 10000); return () => window.clearInterval(timer) }, [market, view, period, moverMarket, moverDirection])
   useEffect(() => { const poll = async () => { try { const response = await fetch(`${API}/status`, { credentials: 'same-origin' }); const payload = await response.json(); setStreamStatus(payload.data?.twelvedata?.status ?? 'stopped') } catch { setStreamStatus('disconnected') } }; void poll(); const timer = window.setInterval(poll, 10000); return () => window.clearInterval(timer) }, [])
-  useEffect(() => { void refreshMarketData(); const timer = window.setInterval(() => void refreshMarketData(), 600000); return () => window.clearInterval(timer) }, [])
+  useEffect(() => { void refreshMarketData(); const timer = window.setInterval(() => void refreshMarketData(), 7200000); return () => window.clearInterval(timer) }, [])
   useEffect(() => { void loadMovers() }, [moverMarket, moverDirection])
   useEffect(() => { void loadHistory(selected) }, [selected?.symbol, selected?.exchange, period])
 
