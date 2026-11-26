@@ -193,6 +193,13 @@ def _twelvedata_stream_loop() -> None:
                 ws.send(json.dumps({
                     "action": "subscribe", "params": {"symbols": ",".join(_stream_symbols)}
                 }))
+            def heartbeat():
+                while not _stream_stop.wait(10) and ws.sock and ws.sock.connected:
+                    try:
+                        ws.send(json.dumps({"action": "heartbeat"}))
+                    except Exception:
+                        return
+            threading.Thread(target=heartbeat, name="market-heatmap-heartbeat", daemon=True).start()
 
         def on_message(ws, raw):
             try:
@@ -263,8 +270,12 @@ def refresh_global() -> dict[str, Any]:
                 asset_type="index", country=country,
             )
 
-    commodity_catalog = _td_get("commodities", {})
-    rows = commodity_catalog if isinstance(commodity_catalog, list) else commodity_catalog.get("data", [])
+    try:
+        commodity_catalog = _td_get("commodities", {})
+        rows = commodity_catalog if isinstance(commodity_catalog, list) else commodity_catalog.get("data", [])
+    except Exception as exc:
+        logger.warning("Twelve Data commodity catalog unavailable: %s", exc)
+        rows = []
     wanted = ("gold", "silver", "crude oil", "natural gas", "copper", "aluminium",
               "aluminum", "wheat", "corn", "brent")
     commodities = [
