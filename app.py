@@ -115,6 +115,7 @@ from blueprints.traffic import traffic_bp  # Import the traffic blueprint
 from blueprints.tv_json import tv_json_bp
 from blueprints.vol_surface import vol_surface_bp  # Import the vol surface blueprint
 from blueprints.watchlist import watchlist_bp  # Import the charting watchlist blueprint
+from blueprints.market_heatmap import market_heatmap_bp  # Market Heatmap page APIs
 from blueprints.websocket_example import websocket_bp  # Import the websocket example blueprint
 from blueprints.whatsapp import whatsapp_bp  # Import the WhatsApp blueprint
 from cors import init_cors
@@ -142,6 +143,7 @@ from database.telegram_db import get_bot_config
 from database.traffic_db import init_logs_db as ensure_traffic_logs_exists
 from database.user_db import init_db as ensure_user_tables_exists
 from database.watchlist_db import init_db as ensure_watchlist_tables_exists
+from database.market_heatmap_db import init_market_heatmap_db
 from database.whatsapp_db import (
     get_bot_config as get_whatsapp_bot_config,  # noqa: F401  (triggers module-level init_db)
 )
@@ -339,6 +341,7 @@ def create_app():
     app.register_blueprint(ivchart_bp)  # Register IV chart blueprint
     app.register_blueprint(scalping_bp)  # Register Scalping terminal blueprint
     app.register_blueprint(watchlist_bp)  # Register charting watchlist blueprint
+    app.register_blueprint(market_heatmap_bp)  # Register Market Heatmap APIs
     app.register_blueprint(alerts_bp)  # Register chart alert log blueprint
     app.register_blueprint(alert_channels_bp)  # Register alert channels (/alerts page)
     app.register_blueprint(oitracker_bp)  # Register OI tracker blueprint
@@ -793,6 +796,7 @@ def setup_environment(app):
                 ("Flow DB", ensure_flow_tables_exists),
                 ("Scalping DB", ensure_scalping_tables_exists),
                 ("Watchlist DB", ensure_watchlist_tables_exists),
+                ("Market Heatmap SQLite DB", init_market_heatmap_db),
                 ("Alert Log DB", ensure_alert_log_tables_exists),
                 ("Alert Channels DB", ensure_alert_channel_tables_exists),
                 ("Leverage DB", ensure_leverage_tables_exists),
