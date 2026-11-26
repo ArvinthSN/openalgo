@@ -173,7 +173,7 @@ def refresh_global() -> dict[str, Any]:
         for row in rows if isinstance(row, dict)
         and any(word in str(row.get("name", "")).lower() for word in wanted)
         and row.get("symbol")
-    ][:12]
+    ][:8]
     commodity_quotes = _td_quote_map([item["symbol"] for item in commodities])
     for item in commodities:
         quote = commodity_quotes.get(item["symbol"].upper())
