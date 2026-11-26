@@ -44,7 +44,7 @@ const PERIODS: Period[] = ['1D', '1W', '1M', '3M', '1Y']
 
 const fmtPrice = (value?: number | null, currency?: string | null) => {
   if (value == null || !Number.isFinite(value)) return '—'
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency === 'INR' ? 'INR' : 'USD', maximumFractionDigits: 2 }).format(value)
+  return new Intl.NumberFormat(currency === 'INR' || currency === '₹' ? 'en-IN' : 'en-US', { style: 'currency', currency: currency === 'INR' || currency === '₹' ? 'INR' : 'USD', maximumFractionDigits: 2 }).format(value)
 }
 const fmtPct = (value?: number | null) => value == null ? '—' : `${value > 0 ? '+' : ''}${value.toFixed(2)}%`
 const tileTone = (value?: number | null) => {
@@ -56,11 +56,11 @@ const tileTone = (value?: number | null) => {
 }
 const queryString = (values: Record<string, string>) => new URLSearchParams(values).toString()
 
-function HeatTile({ asset, selected, onSelect, compact = false }: {
-  asset: Asset; selected: boolean; onSelect: () => void; compact?: boolean
+function HeatTile({ asset, selected, onSelect, compact = false, sizeBy = 'market_cap' }: {
+  asset: Asset; selected: boolean; onSelect: () => void; compact?: boolean; sizeBy?: string
 }) {
   const weight = asset.market_cap ?? asset.reference_market_cap ?? 0
-  const span = !compact && weight > 1_000_000_000_000 ? 2 : 1
+  const span = !compact && sizeBy === 'market_cap' && weight > 1_000_000_000_000 ? 2 : 1
   return (
     <button
       type="button"
@@ -131,7 +131,10 @@ export default function Heatmap() {
       const list: Asset[] = companyPayload.data ?? []
       const commodities: Asset[] = commodityPayload.data ?? []
       setAssets(view === 'companies' ? list.filter(a => a.asset_type !== 'index') : commodities)
-      if (!selected && list.length) setSelected(list.find(a => a.asset_type === 'company') ?? list[0])
+      if (!selected) {
+        const initial = view === 'companies' ? list.find(a => a.asset_type === 'company') ?? list[0] : commodities[0]
+        if (initial) setSelected(initial)
+      }
       if (selected) {
         const updated = [...list, ...commodities].find(a => a.symbol === selected.symbol && a.exchange === selected.exchange)
         if (updated) setSelected(updated)
@@ -224,7 +227,7 @@ export default function Heatmap() {
               return <section className="heat-sector-card" key={group}>
                 <header><b>{group}</b><strong className={average != null && average < 0 ? 'negative' : 'positive'}>{fmtPct(average)}</strong></header>
                 <div className="heat-sector-tiles">
-                  {items.map(asset => <HeatTile key={`${asset.exchange}:${asset.symbol}`} asset={asset} selected={selected?.symbol === asset.symbol && selected.exchange === asset.exchange} onSelect={() => setSelected(asset)} />)}
+                  {items.map(asset => <HeatTile key={`${asset.exchange}:${asset.symbol}`} asset={asset} selected={selected?.symbol === asset.symbol && selected.exchange === asset.exchange} onSelect={() => setSelected(asset)} sizeBy={sizeBy} />)}
                 </div>
               </section>
             }) : <div className="heat-empty-state"><Layers3 size={24} /><b>No market instruments yet</b><span>Once a market-data provider is connected and its instruments are ingested, they will appear here. No sample prices are shown.</span></div>
