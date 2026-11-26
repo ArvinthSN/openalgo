@@ -214,9 +214,9 @@ def get_snapshot(market: str = "ALL", asset_type: str = "ALL", period: str = "1D
                 FROM market_snapshots s
             )
             SELECT i.symbol, i.exchange, i.name, i.asset_type, i.market, i.sector,
-                   i.country, i.currency AS instrument_currency, i.market_cap AS reference_market_cap,
+                   i.country, COALESCE(l.currency, i.currency) AS currency, i.market_cap AS reference_market_cap,
                    l.last_price, l.previous_close, l.change_value, l.change_percent,
-                   l.volume, l.market_cap, l.currency, l.source, l.as_of
+                   l.volume, l.market_cap, l.source, l.as_of
             FROM instruments i
             LEFT JOIN latest l ON l.instrument_id=i.id AND l.rank=1
             {where}
