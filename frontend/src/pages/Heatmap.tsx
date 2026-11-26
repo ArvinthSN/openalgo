@@ -69,6 +69,27 @@ const tileTone = (value?: number | null) => {
 }
 const queryString = (values: Record<string, string>) => new URLSearchParams(values).toString()
 
+/**
+ * Read an API response without assuming every server response is JSON.
+ * Flask may return an HTML login, 404, or error page for an API request.
+ */
+async function readApiJson(response: Response, context: string): Promise<any> {
+  const contentType = response.headers.get('content-type') ?? ''
+  const body = await response.text()
+  if (!contentType.toLowerCase().includes('application/json')) {
+    const isLogin = response.redirected || /<form[^>]+(login|password)|name=["']password["']/i.test(body)
+    const detail = isLogin
+      ? 'OpenAlgo redirected this request to the login page. Sign in again and reload the Heatmap.'
+      : `The server returned HTML instead of JSON (HTTP ${response.status}). Check that the Heatmap API blueprint is registered and that OpenAlgo was restarted from the updated branch.`
+    throw new Error(`${context}: ${detail} URL: ${response.url}`)
+  }
+  try {
+    return JSON.parse(body)
+  } catch {
+    throw new Error(`${context}: the server returned invalid JSON (HTTP ${response.status}).`)
+  }
+}
+
 function HeatTile({ asset, selected, onSelect, compact = false, sizeBy = 'market_cap' }: {
   asset: Asset; selected: boolean; onSelect: () => void; compact?: boolean; sizeBy?: string
 }) {
@@ -179,7 +200,7 @@ export default function Heatmap() {
     try {
       const response = await fetch(`${API}/movers?${queryString({ market: moverMarket, direction: moverDirection, limit: '8' })}`, { credentials: 'same-origin' })
       if (response.ok) {
-        const payload = await response.json()
+        const payload = await readApiJson(response, 'Market data request')
         setMovers(payload.data ?? [])
       }
     } catch { /* The main heatmap remains usable when movers are unavailable. */ }
@@ -191,7 +212,7 @@ export default function Heatmap() {
       const timeframe = period === '1D' ? '5M' : period === '1W' ? '1H' : '1D'
       const response = await fetch(`${API}/instruments/${encodeURIComponent(asset.symbol)}/history?${queryString({ exchange: asset.exchange, timeframe, limit: '250' })}`, { credentials: 'same-origin' })
       if (!response.ok) { setCandles([]); return }
-      const payload = await response.json()
+      const payload = await readApiJson(response, 'Market data request')
       setCandles(payload.data ?? [])
     } catch { setCandles([]) }
   }
@@ -204,7 +225,7 @@ export default function Heatmap() {
       const requestOptions = { credentials: 'same-origin' as RequestCredentials }
       const listsResponse = await fetch('/watchlist/api/lists', requestOptions)
       if (!listsResponse.ok) throw new Error('Could not load your watchlists')
-      let listsPayload = await listsResponse.json()
+      let listsPayload = await readApiJson(listsResponse, 'Load watchlists')
       let target = (listsPayload.data ?? [])[0]
       if (!target) {
         const createResponse = await fetch('/watchlist/api/lists', {
@@ -213,11 +234,11 @@ export default function Heatmap() {
           body: JSON.stringify({ name: 'Heatmap' }),
         })
         if (createResponse.ok) {
-          const created = await createResponse.json()
+          const created = await readApiJson(createResponse, 'Create watchlist')
           target = created.data
         } else {
           const retry = await fetch('/watchlist/api/lists', requestOptions)
-          listsPayload = await retry.json()
+          listsPayload = await readApiJson(retry, 'Reload watchlists')
           target = (listsPayload.data ?? []).find((list: { name: string }) => list.name === 'Heatmap') ?? (listsPayload.data ?? [])[0]
         }
       }
@@ -245,7 +266,7 @@ export default function Heatmap() {
     setRefreshing(true)
     try {
       const response = await fetch(`${API}/refresh`, { credentials: 'same-origin' })
-      const payload = await response.json()
+      const payload = await readApiJson(response, 'Market data request')
       if (!response.ok || payload.status !== 'success') throw new Error(payload.message || 'Market refresh failed')
       setStreamStatus(payload.providers?.global?.stream?.status ?? 'not_configured')
       await Promise.all([loadSnapshot(true), loadMovers(), selected ? loadHistory(selected) : Promise.resolve()])
@@ -285,7 +306,7 @@ export default function Heatmap() {
 
   useEffect(() => { void loadSnapshot() }, [market, view, period])
   useEffect(() => { const timer = window.setInterval(() => { void loadSnapshot(true); void loadMovers() }, 10000); return () => window.clearInterval(timer) }, [market, view, period, moverMarket, moverDirection])
-  useEffect(() => { const poll = async () => { try { const response = await fetch(`${API}/status`, { credentials: 'same-origin' }); const payload = await response.json(); setStreamStatus(payload.data?.twelvedata?.status ?? 'stopped') } catch { setStreamStatus('disconnected') } }; void poll(); const timer = window.setInterval(poll, 10000); return () => window.clearInterval(timer) }, [])
+  useEffect(() => { const poll = async () => { try { const response = await fetch(`${API}/status`, { credentials: 'same-origin' }); const payload = await readApiJson(response, 'Market data request'); setStreamStatus(payload.data?.twelvedata?.status ?? 'stopped') } catch { setStreamStatus('disconnected') } }; void poll(); const timer = window.setInterval(poll, 10000); return () => window.clearInterval(timer) }, [])
   useEffect(() => { void refreshMarketData(); const timer = window.setInterval(() => void refreshMarketData(), 7200000); return () => window.clearInterval(timer) }, [])
   useEffect(() => { void loadMovers() }, [moverMarket, moverDirection])
   useEffect(() => { void loadHistory(selected) }, [selected?.symbol, selected?.exchange, period])
