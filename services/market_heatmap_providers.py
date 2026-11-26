@@ -421,3 +421,14 @@ def refresh_for_user(username: str, *, force: bool = False) -> dict[str, Any]:
     with _refresh_lock:
         _refresh_results[username] = providers
     return result
+
+
+def market_data_status() -> dict[str, Any]:
+    """Expose provider connection state without leaking credentials."""
+    return {
+        "twelvedata": {
+            "configured": bool(os.getenv("TWELVEDATA_API_KEY", "").strip()),
+            **_stream_status,
+            "subscribed_symbols": len(_stream_symbols),
+        }
+    }
