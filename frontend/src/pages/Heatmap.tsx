@@ -142,7 +142,7 @@ function squarifyAssets(items: Asset[], sizeBy: string): Map<string, TreemapRect
   return result
 }
 
-function HeatTile({ asset, selected, onSelect, compact = false, sizeBy = 'market_cap', tileStyle, density = 'large' }: {
+function HeatTile({ asset, selected, onSelect, compact = false, tileStyle, density = 'large' }: {
   asset: Asset; selected: boolean; onSelect: () => void; compact?: boolean; sizeBy?: string; tileStyle?: React.CSSProperties; density?: 'small' | 'medium' | 'large'
 }) {
   return (
